@@ -198,7 +198,7 @@ export default function RootLayout({
 
 注意:
 - `title` 字段直接是字符串(不是对象),因为不再有子页面使用 template
-- body 用 CSS 变量作为颜色,稍后在 globals.css 中定义
+- body 用 CSS 变量作为颜色,这些变量在 Task 4 的 globals.css 中定义
 - 不再使用 Geist Sans/Mono 字体
 - **如果 `next/font/google` 导入 Cinzel 报错**说该字体不存在(罕见情况),回退方案:用 `localFont` 加载本地 woff2。但 Cinzel 在 Google Fonts 上是稳定可用的。
 
