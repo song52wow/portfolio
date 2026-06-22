@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 作品集网站
 
-## Getting Started
+基于 Next.js App Router 的个人影像作品集 MVP，支持 SEO、静态生成与本地视频托管。
 
-First, run the development server:
+## 快速开始
 
 ```bash
+# 安装依赖（首次）
+npm install
+
+# 开发模式
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 生产构建
+npm run build
+
+# 预览生产构建
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+开发服务器默认地址：http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 目录结构
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+public/
+  videos/          # 放置 MP4 视频文件
+  images/          # 缩略图 / 海报
+src/
+  app/
+    page.tsx       # 首页作品网格
+    works/[slug]/  # 作品详情页
+    layout.tsx     # 全局布局与 SEO metadata
+    sitemap.ts     # 站点地图
+    robots.ts      # 爬虫规则
+  components/      # WorkCard、VideoPlayer 等
+  data/works.ts    # 作品数据
+```
 
-## Learn More
+## 添加新作品
 
-To learn more about Next.js, take a look at the following resources:
+1. 将视频文件放入 `public/videos/`，例如 `my-work.mp4`
+2. 将缩略图放入 `public/images/`，例如 `my-work-poster.jpg`
+3. 在 `src/data/works.ts` 的 `works` 数组中新增一条记录：
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```ts
+{
+  id: "4",
+  slug: "my-work",           // URL: /works/my-work
+  title: "作品标题",
+  description: "作品描述",
+  videoSrc: "/videos/my-work.mp4",
+  thumbnailSrc: "/images/my-work-poster.jpg",
+  tags: ["标签1", "标签2"],
+  year: 2025,
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+保存后重新构建即可，详情页会通过 `generateStaticParams` 自动生成静态页面。
 
-## Deploy on Vercel
+## 放置视频文件
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 视频放在 `public/videos/`，通过 `/videos/文件名.mp4` 引用
+- 详见 `public/videos/README.md`
+- 当前示例作品使用占位封面，需自行替换对应 MP4 文件
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## SEO 配置
+
+- 根布局设置了站点级 `title` 模板、`description`、Open Graph
+- 每个作品详情页通过 `generateMetadata` 生成独立 SEO 信息
+- `sitemap.xml` 与 `robots.txt` 已配置
+
+生产部署时建议设置环境变量：
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
+
+用于 sitemap、robots 和 Open Graph 的绝对 URL。
