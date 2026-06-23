@@ -1,20 +1,13 @@
-# 作品集网站
+# 作品集
 
-基于 Next.js App Router 的个人影像作品集 MVP，支持 SEO、静态生成与本地视频托管。
+基于 Next.js App Router 的个人影像作品集，采用电影感铜黄暗金调视觉风格。
 
 ## 快速开始
 
 ```bash
-# 安装依赖（首次）
 npm install
-
-# 开发模式
 npm run dev
-
-# 生产构建
 npm run build
-
-# 预览生产构建
 npm run start
 ```
 
@@ -24,17 +17,16 @@ npm run start
 
 ```
 public/
-  videos/          # 放置 MP4 视频文件
-  images/          # 缩略图 / 海报
+  videos/          视频文件
+  images/          缩略图
 src/
   app/
-    page.tsx       # 首页作品网格
-    works/[slug]/  # 作品详情页
-    layout.tsx     # 全局布局与 SEO metadata
-    sitemap.ts     # 站点地图
-    robots.ts      # 爬虫规则
-  components/      # WorkCard、VideoPlayer 等
-  data/works.ts    # 作品数据
+    page.tsx       单页沉浸式画廊
+    layout.tsx     全局布局、字体与 SEO metadata
+    robots.ts      爬虫规则
+  components/
+    ImmersiveGallery.tsx   沉浸式画廊组件
+  data/works.ts    作品数据
 ```
 
 ## 添加新作品
@@ -45,35 +37,27 @@ src/
 
 ```ts
 {
-  id: "4",
-  slug: "my-work",           // URL: /works/my-work
-  title: "作品标题",
-  description: "作品描述",
+  id: "2",
+  slug: "my-work",
+  title: "My Work",
+  description: "作品描述。",
   videoSrc: "/videos/my-work.mp4",
   thumbnailSrc: "/images/my-work-poster.jpg",
-  tags: ["标签1", "标签2"],
-  year: 2025,
+  tags: ["SHORT FILM"],
+  year: 2026,
 }
 ```
 
-保存后重新构建即可，详情页会通过 `generateStaticParams` 自动生成静态页面。
+## 深链接
 
-## 放置视频文件
+通过 query string 预选作品：
+- `/` — 默认选中第一个作品
+- `/?w=my-work` — 直接选中指定 slug 的作品
 
-- 视频放在 `public/videos/`，通过 `/videos/文件名.mp4` 引用
-- 详见 `public/videos/README.md`
-- 当前示例作品使用占位封面，需自行替换对应 MP4 文件
+## 字体
 
-## SEO 配置
+Cinzel（英文大写罗马雕刻体）+ Noto Serif SC（中文衬线）在 `globals.css` 中通过 `@import` 从 Google Fonts 加载。
 
-- 根布局设置了站点级 `title` 模板、`description`、Open Graph
-- 每个作品详情页通过 `generateMetadata` 生成独立 SEO 信息
-- `sitemap.xml` 与 `robots.txt` 已配置
+## 设计规格
 
-生产部署时建议设置环境变量：
-
-```bash
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-```
-
-用于 sitemap、robots 和 Open Graph 的绝对 URL。
+详见 `docs/superpowers/specs/2026-06-23-ui-redesign-cinema-style-design.md`。
