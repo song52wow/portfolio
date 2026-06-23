@@ -1,23 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Noto+Serif+SC:wght@300;400;500;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
+  /* 铜黄冷金调色板 */
+  --background: #0a0806;       /* 深棕黑底 */
+  --surface:    #14110d;       /* 面板底(备用) */
+  --border:     #2a2520;       /* 描边 */
+  --gold:       #b8860b;       /* 黄铜金(主点缀) */
+  --gold-soft:  #cd9b3a;       /* 黄铜金(hover) */
+  --gold-pale:  #6b5418;       /* 黄铜金(暗调) */
+  --text:       #e6dec5;       /* 浅金主文字 */
+  --text-dim:   #8a7d5f;       /* 浅金次文字 */
+  --text-mute:  #5a5142;       /* 浅金最弱文字 */
+  --rec:        #c0392b;       /* 录制指示灯红(仅 REC 圆点) */
+
+  /* 字体(纯字符串,运行时由浏览器从 Google Fonts 加载) */
+  --font-cinzel: "Cinzel", "Times New Roman", serif;
+  --font-noto: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-pale: var(--gold-pale);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-mute: var(--text-mute);
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--text);
+  font-family: var(--font-noto), var(--font-cinzel), serif;
 }
 
-code {
-  font-family: var(--font-mono), monospace;
+/* 视频层交叉溶解 */
+.video-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 250ms ease-in-out;
+  pointer-events: none;
+}
+.video-layer.active {
+  opacity: 1;
 }
