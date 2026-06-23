@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { works, type Work } from "@/data/works";
@@ -12,21 +11,28 @@ type ImmersiveGalleryProps = {
 
 export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoARef = useRef<HTMLVideoElement>(null);
+  const videoBRef = useRef<HTMLVideoElement>(null);
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const [selectedSlug, setSelectedSlug] = useState(
     () => initialSlug ?? works[0]?.slug ?? "",
   );
+  const [activeLayer, setActiveLayer] = useState<"A" | "B">("A");
+  const [pendingSlug, setPendingSlug] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(true);
-  const [isBottomHovered, setIsBottomHovered] = useState(false);
+
+  const [layerASlug, setLayerASlug] = useState(selectedSlug);
+  const [layerBSlug, setLayerBSlug] = useState<string | null>(null);
 
   const selectedWork =
     works.find((work) => work.slug === selectedSlug) ?? works[0];
+  const selectedIndex = works.findIndex((work) => work.slug === selectedSlug);
 
   useEffect(() => {
     if (initialSlug) {
       setSelectedSlug(initialSlug);
+      setLayerASlug(initialSlug);
     }
   }, [initialSlug]);
 
@@ -35,87 +41,199 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
     el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }, [selectedSlug]);
 
+  // 当 pendingSlug 变化时,加载 layerB
   useEffect(() => {
-    const video = videoRef.current;
+    if (!pendingSlug || pendingSlug === layerASlug) return;
+    setLayerBSlug(pendingSlug);
+    setActiveLayer("B");
+    const video = videoBRef.current;
     if (!video) return;
     video.load();
     void video.play().catch(() => {});
-  }, [selectedSlug]);
+  }, [pendingSlug, layerASlug]);
+
+  // 当 layerB 视频 loadeddata 后,260ms 完成切换
+  const handleLayerBLoaded = useCallback(() => {
+    const timer = setTimeout(() => {
+      setLayerASlug((_prev) => {
+        const next = layerBSlug ?? _prev;
+        setActiveLayer("A");
+        setLayerBSlug(null);
+        setPendingSlug(null);
+        return next;
+      });
+      if (pendingSlug) {
+        router.replace(`/?w=${pendingSlug}`, { scroll: false });
+      }
+    }, 260);
+    return () => clearTimeout(timer);
+  }, [layerBSlug, pendingSlug, router]);
 
   const selectWork = useCallback(
     (work: Work) => {
+      if (work.slug === selectedSlug) return;
       setSelectedSlug(work.slug);
-      router.push(`/works/${work.slug}`, { scroll: false });
+      setPendingSlug(work.slug);
     },
-    [router],
+    [selectedSlug],
   );
 
   const toggleMute = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = !video.muted;
-    setIsMuted(video.muted);
+    const videoA = videoARef.current;
+    const videoB = videoBRef.current;
+    [videoA, videoB].forEach((v) => {
+      if (!v) return;
+      v.muted = !v.muted;
+    });
+    setIsMuted((m) => !m);
   }, []);
 
   if (!selectedWork) return null;
 
+  const currentWorkA = works.find((w) => w.slug === layerASlug) ?? selectedWork;
+  const currentWorkB = layerBSlug
+    ? works.find((w) => w.slug === layerBSlug)
+    : null;
+
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-black">
-      {/* 全屏背景视频 */}
-      <div className="absolute inset-0 h-dvh w-full">
+    <div className="relative h-dvh w-full overflow-hidden">
+      {/* 双视频层 */}
+      <video
+        ref={videoARef}
+        key={`a-${currentWorkA.slug}`}
+        className={`video-layer ${activeLayer === "A" && !pendingSlug ? "active" : ""}`}
+        src={currentWorkA.videoSrc}
+        poster={currentWorkA.thumbnailSrc}
+        autoPlay
+        muted={isMuted}
+        playsInline
+        loop
+        preload="auto"
+        aria-label={`${currentWorkA.title} 视频`}
+      />
+      {currentWorkB && (
         <video
-          ref={videoRef}
-          key={selectedWork.slug}
-          className="h-full w-full object-cover"
-          src={selectedWork.videoSrc}
-          poster={selectedWork.thumbnailSrc}
+          ref={videoBRef}
+          key={`b-${currentWorkB.slug}`}
+          className={`video-layer ${activeLayer === "B" ? "active" : ""}`}
+          src={currentWorkB.videoSrc}
+          poster={currentWorkB.thumbnailSrc}
           autoPlay
           muted={isMuted}
           playsInline
           loop
           preload="auto"
-          aria-label={`${selectedWork.title} 视频`}
+          onLoadedData={handleLayerBLoaded}
+          aria-label={`${currentWorkB.title} 视频`}
         />
+      )}
+
+      {/* 顶部:左上 REC 编号 + 右上 SOUND 按钮 */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between p-6">
         <div
-          className={`pointer-events-none absolute inset-0 bg-black transition-opacity duration-300 ${
-            isBottomHovered ? "opacity-10" : "opacity-0"
-          }`}
+          className="pointer-events-auto flex items-center gap-2 text-[var(--text-dim)]"
+          style={{
+            fontFamily: "var(--font-cinzel)",
+            fontSize: "10px",
+            letterSpacing: "0.35em",
+          }}
+        >
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full"
+            style={{ background: "var(--rec)" }}
+            aria-hidden
+          />
+          <span>REC // N°{String(selectedIndex + 1).padStart(2, "0")}</span>
+        </div>
+        <button
+          type="button"
+          onClick={toggleMute}
+          aria-pressed={isMuted}
+          aria-label={isMuted ? "开启声音" : "关闭声音"}
+          className="pointer-events-auto rounded-full border px-3 py-1.5 text-[var(--gold)] transition-colors hover:text-[var(--gold-soft)]"
+          style={{
+            fontFamily: "var(--font-cinzel)",
+            borderColor: "var(--gold)",
+            fontSize: "10px",
+            letterSpacing: "0.3em",
+          }}
+        >
+          {isMuted ? "SOUND OFF" : "SOUND ON"}
+        </button>
+      </div>
+
+      {/* 底部面板 */}
+      <div
+        className="absolute inset-x-4 bottom-6 z-20 sm:inset-x-6"
+        role="region"
+        aria-label="作品信息"
+      >
+        {/* 顶部金线分隔 */}
+        <div
+          className="mb-4 h-px w-full"
+          style={{ background: "var(--gold-pale)" }}
           aria-hidden
         />
-      </div>
 
-      {/* 顶部品牌与取消静音 */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between p-4 sm:p-6">
-        <Link
-          href="/"
-          className="pointer-events-auto text-sm font-semibold tracking-tight text-zinc-100/90 transition-colors hover:text-white"
-        >
-          作品集
-        </Link>
-        {isMuted && (
-          <button
-            type="button"
-            onClick={toggleMute}
-            className="pointer-events-auto rounded-full border border-zinc-600/80 bg-zinc-950/70 px-3 py-1.5 text-xs text-zinc-200 backdrop-blur-sm transition-colors hover:border-zinc-400 hover:text-white"
+        {/* 标题与元数据 */}
+        <div className="px-2 pb-4 sm:px-4">
+          <h1
+            className="text-[var(--text)]"
+            style={{
+              fontFamily: "var(--font-cinzel)",
+              fontSize: "clamp(24px, 4vw, 36px)",
+              letterSpacing: "0.2em",
+              lineHeight: 1.1,
+            }}
           >
-            点击开启声音
-          </button>
-        )}
-      </div>
+            {selectedWork.title.toUpperCase()}
+          </h1>
+          {/* 标题下方短金线 */}
+          <div
+            className="mt-3 h-[2px] w-10"
+            style={{ background: "var(--gold)" }}
+            aria-hidden
+          />
+          <div
+            className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[var(--text-dim)]"
+            style={{ fontSize: "11px", letterSpacing: "0.3em" }}
+          >
+            {selectedWork.year && <span>{selectedWork.year}</span>}
+            {selectedWork.tags && selectedWork.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {selectedWork.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="border px-2 py-0.5 text-[var(--gold-soft)]"
+                    style={{
+                      fontFamily: "var(--font-cinzel)",
+                      borderColor: "var(--gold)",
+                      fontSize: "10px",
+                      letterSpacing: "0.15em",
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <p
+            className="mt-3 text-[var(--text-dim)]"
+            style={{
+              fontFamily: "var(--font-noto)",
+              fontSize: "14px",
+              lineHeight: 1.7,
+              letterSpacing: "0.02em",
+            }}
+          >
+            {selectedWork.description}
+          </p>
+        </div>
 
-      {/* 底部悬浮区：作品列表 + 作品说明 */}
-      <div
-        className={`absolute inset-x-4 bottom-6 z-20 overflow-hidden rounded-xl border border-zinc-800/60 bg-zinc-950/75 backdrop-blur-md transition-opacity duration-300 ${
-          isBottomHovered ? "opacity-100" : "opacity-90"
-        }`}
-        role="region"
-        aria-label="作品列表"
-        onMouseEnter={() => setIsBottomHovered(true)}
-        onMouseLeave={() => setIsBottomHovered(false)}
-      >
-        {/* 模块一：横向作品缩略图 */}
-        <div className="overflow-x-auto overscroll-x-contain border-b border-zinc-800/50 [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
-          <div className="flex snap-x snap-mandatory gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
+        {/* 缩略图带 */}
+        <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
+          <div className="flex snap-x snap-mandatory gap-3 px-2 pb-2 sm:gap-4 sm:px-4">
             {works.map((work) => {
               const isSelected = work.slug === selectedSlug;
               return (
@@ -129,13 +247,15 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
                   onClick={() => selectWork(work)}
                   aria-current={isSelected ? "true" : undefined}
                   aria-label={`播放 ${work.title}`}
-                  className={`group shrink-0 snap-center overflow-hidden rounded-lg border-2 transition-all duration-200 ${
-                    isSelected
-                      ? "scale-105 border-zinc-100 shadow-lg shadow-black/40"
-                      : "border-transparent opacity-70 hover:opacity-100"
-                  }`}
+                  className="group shrink-0 snap-center overflow-hidden rounded-md transition-colors"
+                  style={{
+                    border: `1px solid ${isSelected ? "var(--gold)" : "var(--gold-pale)"}`,
+                    boxShadow: isSelected
+                      ? "0 0 0 1px var(--gold-soft), 0 0 12px rgba(184, 134, 11, 0.25)"
+                      : "none",
+                  }}
                 >
-                  <div className="relative h-[4.5rem] w-[5.5rem] bg-zinc-900 sm:h-[5rem] sm:w-[6.5rem]">
+                  <div className="relative h-[4.5rem] w-[5.5rem] bg-[var(--surface)] sm:h-[5rem] sm:w-[6.5rem]">
                     <Image
                       src={work.thumbnailSrc}
                       alt=""
@@ -144,9 +264,22 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
                       sizes="104px"
                       aria-hidden
                     />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1.5 pb-1 pt-4">
-                      <span className="line-clamp-1 text-left text-[10px] font-medium text-zinc-100 sm:text-xs">
-                        {work.title}
+                    <div
+                      className="absolute inset-x-0 bottom-0 px-1.5 pb-1 pt-4"
+                      style={{
+                        background:
+                          "linear-gradient(to top, rgba(10, 8, 6, 0.85), transparent)",
+                      }}
+                    >
+                      <span
+                        className="line-clamp-1 block text-left text-[var(--text)]"
+                        style={{
+                          fontFamily: "var(--font-cinzel)",
+                          fontSize: "10px",
+                          letterSpacing: "0.1em",
+                        }}
+                      >
+                        {work.title.toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -154,33 +287,6 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
               );
             })}
           </div>
-        </div>
-
-        {/* 模块二：选中作品说明 */}
-        <div className="px-4 py-3 sm:px-6 sm:py-4">
-          <h1 className="text-base font-semibold text-zinc-50 sm:text-lg">
-            {selectedWork.title}
-          </h1>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-            {selectedWork.year && (
-              <span className="text-sm text-zinc-400">{selectedWork.year}</span>
-            )}
-            {selectedWork.tags && selectedWork.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {selectedWork.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-zinc-800/80 px-2 py-0.5 text-xs text-zinc-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-            {selectedWork.description}
-          </p>
         </div>
       </div>
     </div>
