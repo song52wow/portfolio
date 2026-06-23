@@ -50,7 +50,18 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
     if (!video) return;
     video.load();
     void video.play().catch(() => {});
-  }, [pendingSlug, layerASlug]);
+
+    // 降级:1.5s 内 loadeddata 未触发,强制切换(跳过动画)
+    const fallback = setTimeout(() => {
+      setLayerASlug(pendingSlug);
+      setActiveLayer("A");
+      setLayerBSlug(null);
+      setPendingSlug(null);
+      router.replace(`/?w=${pendingSlug}`, { scroll: false });
+    }, 1500);
+
+    return () => clearTimeout(fallback);
+  }, [pendingSlug, layerASlug, router]);
 
   // 当 layerB 视频 loadeddata 后,260ms 完成切换
   const handleLayerBLoaded = useCallback(() => {
