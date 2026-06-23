@@ -12,13 +12,13 @@ export type Work = {
 export const works: Work[] = [
   {
     id: "1",
-    slug: "BaaBaaBet",
+    slug: "baabaabet",
     title: "BaaBaaBet",
     description:
-      "覆盖赛事大厅、下单处理、自建事件、Membership NFT、个人中心全链路的 Web3 链上预测 DApp",
+      "覆盖赛事大厅、下单处理、自建事件、Membership NFT、个人中心全链路的 Web3 链上预测 DApp。",
     videoSrc: "/videos/baabaabet.mov",
     thumbnailSrc: "/images/baabaabet.png",
-    tags: [],
+    tags: ["DAPP", "WEB3", "PREDICTION"],
     year: 2025,
   },
 ];
