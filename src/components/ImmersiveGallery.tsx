@@ -30,9 +30,15 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
   const selectedIndex = works.findIndex((work) => work.slug === selectedSlug);
 
   useEffect(() => {
-    if (initialSlug) {
-      setSelectedSlug(initialSlug);
-      setLayerASlug(initialSlug);
+    // 优先从 prop(initialSlug)读取,否则从 URL 查询参数读取
+    const fromUrl =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("w")
+        : null;
+    const slug = initialSlug ?? fromUrl;
+    if (slug && works.some((w) => w.slug === slug)) {
+      setSelectedSlug(slug);
+      setLayerASlug(slug);
     }
   }, [initialSlug]);
 
