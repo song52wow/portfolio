@@ -181,19 +181,12 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
 
       {/* 底部面板 */}
       <div
-        className="absolute inset-x-4 bottom-6 z-20 sm:inset-x-6"
+        className="absolute inset-x-4 bottom-6 z-20 overflow-hidden rounded-xl border border-[var(--gold-pale)]/40 bg-[rgba(10,8,6,0.92)] backdrop-blur-sm sm:inset-x-6"
         role="region"
         aria-label="作品信息"
       >
-        {/* 顶部金线分隔 */}
-        <div
-          className="mb-4 h-px w-full"
-          style={{ background: "var(--gold-pale)" }}
-          aria-hidden
-        />
-
         {/* 标题与元数据 */}
-        <div className="px-2 pb-4 sm:px-4">
+        <div className="px-5 pt-5 pb-4 sm:px-7 sm:pt-6">
           <h1
             className="text-[var(--text)]"
             style={{
@@ -248,9 +241,16 @@ export function ImmersiveGallery({ initialSlug }: ImmersiveGalleryProps) {
           </p>
         </div>
 
+        {/* 缩略图带分隔线 */}
+        <div
+          className="h-px w-full"
+          style={{ background: "var(--gold-pale)" }}
+          aria-hidden
+        />
+
         {/* 缩略图带 */}
         <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
-          <div className="flex snap-x snap-mandatory gap-3 px-2 pb-2 sm:gap-4 sm:px-4">
+          <div className="flex snap-x snap-mandatory gap-3 px-5 py-3 sm:gap-4 sm:px-7 sm:py-4">
             {works.map((work) => {
               const isSelected = work.slug === selectedSlug;
               return (
