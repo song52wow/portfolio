@@ -1,16 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const siteName = "作品集";
 const siteDescription =
@@ -20,10 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
-  title: {
-    default: siteName,
-    template: `%s | ${siteName}`,
-  },
+  title: siteName,
   description: siteDescription,
   openGraph: {
     type: "website",
@@ -45,11 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="overflow-hidden bg-zinc-950 text-zinc-100">
+    <html lang="zh-CN" className="h-full antialiased">
+      <body className="overflow-hidden bg-[var(--background)] text-[var(--text)]">
         {children}
       </body>
     </html>
