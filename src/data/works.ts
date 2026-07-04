@@ -21,6 +21,28 @@ export const works: Work[] = [
     tags: ["DAPP", "WEB3", "PREDICTION"],
     year: 2025,
   },
+  {
+    id: "2",
+    slug: "cuporacle",
+    title: "CupOracle",
+    description:
+      "足球预言家：预测足球世界杯赛事结果的 AI 助手。",
+    videoSrc: "/videos/cuporacle.mov",
+    thumbnailSrc: "/images/cuporacle.png",
+    tags: ["AI", "PREDICTION"],
+    year: 2026,
+  },
+  {
+    id: "3",
+    slug: "extension",
+    title: "Extension Purse",
+    description:
+      "Chrome 浏览器扩展：一键将视频链接转换为嵌入代码。",
+    videoSrc: "/videos/extension-purse.mov",
+    thumbnailSrc: "/images/extension-purse.png",
+    tags: ["EXTENSION", "CHROME"],
+    year: 2026,
+  },
 ];
 
 export function getWorkBySlug(slug: string): Work | undefined {
