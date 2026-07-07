@@ -42,3 +42,17 @@ next-env.d.ts
 
 # superpowers brainstorming artifacts (visual companion mockups, etc.)
 .superpowers/
+
+# debug screenshots & playwright artifacts (never tracked)
+/.debug-snapshots/
+/.playwright-mcp/
+# stray screenshots that get dumped at the project root — single home is docs/screenshots/
+/.*.png
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+/*.gif
+/homepage-*.png
+/wall-*.png
+# tracked screenshots live under docs/screenshots/** (carousel/, resume/, references/, …)

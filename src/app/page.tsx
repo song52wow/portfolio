@@ -1,19 +1,33 @@
 import type { Metadata } from "next";
-import { ImmersiveGallery } from "@/components/ImmersiveGallery";
+import { Suspense } from "react";
+import { SiteHeader } from "@/components/SiteHeader";
+import { WorkIndex } from "@/components/WorkIndex";
+import { works } from "@/data/works";
 
 export const metadata: Metadata = {
-  title: "全部作品",
-  description: "浏览影像作品集，包含短片、实验影像与视觉创作。",
+  title: "作品集 / EXHIBITION WORKS",
+  description: "个人影像作品索引 · Index of moving-image works.",
   openGraph: {
-    title: "全部作品",
-    description: "浏览影像作品集，包含短片、实验影像与视觉创作。",
+    title: "作品集 / EXHIBITION WORKS",
+    description: "个人影像作品索引 · Index of moving-image works.",
   },
 };
 
 export default function HomePage() {
   return (
-    <main className="h-dvh w-full">
-      <ImmersiveGallery />
-    </main>
+    <>
+      <SiteHeader />
+      <Suspense
+        fallback={
+          <div className="grid min-h-dvh place-items-center">
+            <p className="catalog-num text-[11px] text-[var(--mute-on-night)]">
+              Loading index…
+            </p>
+          </div>
+        }
+      >
+        <WorkIndex />
+      </Suspense>
+    </>
   );
 }

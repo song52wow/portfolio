@@ -1,50 +1,261 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Noto+Serif+SC:wght@300;400;500;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  /* 铜黄冷金调色板 */
-  --background: #0a0806;       /* 深棕黑底 */
-  --surface:    #14110d;       /* 面板底(备用) */
-  --border:     #2a2520;       /* 描边 */
-  --gold:       #b8860b;       /* 黄铜金(主点缀) */
-  --gold-soft:  #cd9b3a;       /* 黄铜金(hover) */
-  --gold-pale:  #6b5418;       /* 黄铜金(暗调) */
-  --text:       #e6dec5;       /* 浅金主文字 */
-  --text-dim:   #8a7d5f;       /* 浅金次文字 */
-  --text-mute:  #5a5142;       /* 浅金最弱文字 */
-  --rec:        #c0392b;       /* 录制指示灯红(仅 REC 圆点) */
+/* ----------------------------------------------------------------------
+ * Design tokens — Cinematic Dark Carousel edition
+ * Night × Twilight × Ember. Replaces the prior Ink × Paper × Vermilion.
+ * Mood: editorial-travel, dark cinematic backdrop, warm ember accent.
+ * -------------------------------------------------------------------- */
 
-  /* 字体(纯字符串,运行时由浏览器从 Google Fonts 加载) */
-  --font-cinzel: "Cinzel", "Times New Roman", serif;
-  --font-noto: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+:root {
+  /* Surfaces */
+  --night:          #0a0814;  /* deep purple-black — page background */
+  --twilight:       #1f1330;  /* dim purple — secondary surfaces */
+  --dawn:           #2a1f3d;  /* lifted purple — timeline track */
+
+  /* Accent (single signal, used sparingly) */
+  --ember:          #f15a4a;  /* coral red — CTA, active nodes */
+  --ember-soft:     #d65635;  /* sunset orange — hover state */
+
+  /* Text (on night) */
+  --paper-on-night: #f4ecd9;  /* cream — primary text (avoids cold white) */
+  --mute-on-night:  #8c8094;  /* purple-grey — secondary text */
+  --ghost-on-night: rgba(244, 236, 217, 0.18); /* washed lines, hairlines */
+
+  --rule:           1px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-border: var(--border);
-  --color-gold: var(--gold);
-  --color-gold-soft: var(--gold-soft);
-  --color-gold-pale: var(--gold-pale);
-  --color-text: var(--text);
-  --color-text-dim: var(--text-dim);
-  --color-text-mute: var(--text-mute);
+  --color-night:          var(--night);
+  --color-twilight:       var(--twilight);
+  --color-dawn:           var(--dawn);
+  --color-ember:          var(--ember);
+  --color-ember-soft:     var(--ember-soft);
+  --color-text:           var(--paper-on-night);
+  --color-text-dim:       var(--mute-on-night);
+  --color-text-mute:      #5a4f6e;
+  --color-paper:          var(--paper-on-night);
+  --color-stamp:          var(--ember);
+  --color-ink-soft:       var(--dawn);
+
+  /* Font families injected by next/font in layout.tsx */
+  --font-display: var(--font-bricolage);
+  --font-body:    var(--font-manrope);
+  --font-mono:    var(--font-jetbrains);
+  --font-cjk:     var(--font-noto);
+
+  --default-font-feature-settings: "tnum", "ss01";
+}
+
+html, body {
+  background: var(--night);
+  color: var(--paper-on-night);
 }
 
 body {
-  background: var(--background);
-  color: var(--text);
-  font-family: var(--font-noto), var(--font-cinzel), serif;
+  font-family: var(--font-body), var(--font-cjk), "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "tnum", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 视频层交叉溶解 */
-.video-layer {
+/* ----------------------------------------------------------------------
+ * Grain overlay — applied via .cinematic class on the carousel root
+ * SVG fractal noise, very low opacity, fixed across scroll.
+ * -------------------------------------------------------------------- */
+.cinematic::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ----------------------------------------------------------------------
+ * Layer — Cinematic utilities
+ * -------------------------------------------------------------------- */
+
+/* Numbered catalog chip (used on timeline + pager) */
+.catalog-num {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Display headline — used on centerpiece */
+.display-headline {
+  font-family: var(--font-display), serif;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  font-weight: 700;
+}
+
+/* Hairline rule on dark */
+.hairline {
+  height: 1px;
+  background: var(--ghost-on-night);
+}
+
+/* Glass pill — the floating nav container */
+.glass-pill {
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 40px -8px rgba(0, 0, 0, 0.55);
+}
+
+/* Ember CTA pill — used for primary actions */
+.btn-ember {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1.5rem 0.95rem 1.6rem;
+  background: var(--ember);
+  color: var(--paper-on-night);
+  border-radius: 9999px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.005em;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 220ms ease,
+    transform 220ms cubic-bezier(.2,.7,.3,1),
+    box-shadow 220ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-ember:hover {
+    background: var(--ember-soft);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px -10px rgba(241, 90, 74, 0.55);
+  }
+}
+
+/* Circle icon button (search, apps, prev/next, scroll-arrow) */
+.circle-btn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--paper-on-night);
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .circle-btn:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.circle-btn--ember {
+  background: var(--ember);
+  border-color: transparent;
+  color: var(--paper-on-night);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .circle-btn--ember:hover {
+    background: var(--ember-soft);
+    transform: translateY(-2px);
+  }
+}
+
+/* Cinematic card 3D hover — used on thumbnail stack */
+@media (prefers-reduced-motion: no-preference) {
+  .card-3d {
+    transition:
+      transform 350ms cubic-bezier(.2,.7,.3,1),
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+    transform-style: preserve-3d;
+  }
+}
+
+/* Focus ring — ember 2px ring */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Backdrop cinematic vignette + glow — applied via .cinematic-bg */
+.cinematic-bg {
+  background: #0a0814;
+}
+
+/* VideoBackdrop root sits below the landscape so the SVG is the
+ * primary visual identity. Kept as z-index for explicit ordering. */
+.backdrop-root {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 250ms ease-in-out;
+  z-index: 1;
+  opacity: 0.18;        /* very low — only adds subtle hue to landscape */
   pointer-events: none;
 }
-.video-layer.active {
-  opacity: 1;
+
+/* Cinematic landscape — fixed full-viewport SVG with Mt Fuji, pagoda,
+ * distant ridges, sakura petals and warm dusk gradient. This is the
+ * PRIMARY background identity of the carousel — work thumbnails sit
+ * on top of it at very low opacity as subtle texture. */
+.landscape-svg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;          /* above VideoBackdrop (z-1), below text layers (z-10+) */
+  overflow: hidden;
+}
+.landscape-svg > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Sunset wash — layered on .cinematic via a fixed pseudo so it
+ * survives any video / image layer underneath. Pulls the page toward
+ * the dusk gradient in the Japan reference. */
+.cinematic::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 55;
+  background:
+    radial-gradient(ellipse 90% 55% at 75% 18%, rgba(218, 92, 138, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 18% 70%, rgba(255, 138, 88, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(20, 8, 36, 0.55) 0%, transparent 65%);
+}
+
+/* Slide-in / slide-out keyframes (used by carousel crossfade) */
+@keyframes slide-fade-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-fade-out-left {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-40px); }
+}
+
+/* Headline stagger entrance */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
 }
