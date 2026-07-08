@@ -55,4 +55,10 @@ next-env.d.ts
 /*.gif
 /homepage-*.png
 /wall-*.png
+# iteration / debugging screenshots in docs/screenshots/ — never tracked
+/docs/screenshots/carousel/v[0-9]*.png
+/docs/screenshots/carousel/_compare-*.png
+/docs/screenshots/carousel/before-fix-*.png
+/docs/screenshots/carousel/after-fix-*.png
+/docs/screenshots/carousel/final-*.png
 # tracked screenshots live under docs/screenshots/** (carousel/, resume/, references/, …)

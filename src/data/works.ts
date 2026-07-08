@@ -4,6 +4,7 @@ export type Work = {
   title: string;
   description: string;
   videoSrc: string;
+  videoMp4Src?: string;
   thumbnailSrc: string;
   tags?: string[];
   year?: number;
@@ -17,6 +18,7 @@ export const works: Work[] = [
     description:
       "覆盖赛事大厅、下单处理、自建事件、Membership NFT、个人中心全链路的 Web3 链上预测 DApp。",
     videoSrc: "/videos/baabaabet.mov",
+    videoMp4Src: "/videos/baabaabet.mp4",
     thumbnailSrc: "/images/baabaabet.png",
     tags: ["DAPP", "WEB3", "PREDICTION"],
     year: 2025,
@@ -28,6 +30,7 @@ export const works: Work[] = [
     description:
       "足球预言家：预测足球世界杯赛事结果的 AI 助手。",
     videoSrc: "/videos/cuporacle.mov",
+    videoMp4Src: "/videos/cuporacle.mp4",
     thumbnailSrc: "/images/cuporacle.png",
     tags: ["AI", "PREDICTION"],
     year: 2026,
@@ -39,6 +42,7 @@ export const works: Work[] = [
     description:
       "Chrome 浏览器扩展：一键将视频链接转换为嵌入代码。",
     videoSrc: "/videos/extension-purse.mov",
+    videoMp4Src: "/videos/extension-purse.mp4",
     thumbnailSrc: "/images/extension-purse.png",
     tags: ["EXTENSION", "CHROME"],
     year: 2026,

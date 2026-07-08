@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Bricolage_Grotesque,
   JetBrains_Mono,
@@ -58,6 +58,13 @@ export const metadata: Metadata = {
     title: siteName,
     description: siteDescription,
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0a0814",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({

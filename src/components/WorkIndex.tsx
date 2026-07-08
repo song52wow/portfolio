@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -17,6 +18,32 @@ const CROSSFADE_MS = 600;
 /* Toggle the right-side thumbnail stack on/off. Set to true to bring it
  * back. Currently hidden per request. */
 const SHOW_THUMBNAILS = false;
+
+/* Detect mobile viewport (Tailwind `sm` breakpoint = 640px). Routes the
+ * play button to an overlay player on small screens instead of the
+ * in-place cinematic background video. */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return isMobile;
+}
+
+/* Build the <source> list for a work. The H.264 MP4 is preferred (plays
+ * on iOS / Android / desktop Chrome); the original .mov is kept as a
+ * Safari/legacy fallback. Order matters — browsers pick the first they
+ * can play. */
+function buildVideoSources(work: Work): { src: string; type: string }[] {
+  const list: { src: string; type: string }[] = [];
+  if (work.videoMp4Src) list.push({ src: work.videoMp4Src, type: "video/mp4" });
+  list.push({ src: work.videoSrc, type: "video/quicktime" });
+  return list;
+}
 
 /* ----------------------------------------------------------------
  * HeroBackdrop — full-viewport background for the ACTIVE work.
@@ -71,7 +98,6 @@ function HeroBackdrop({
       {/* Video — plays full-screen when isPlaying, covers the image */}
       <video
         ref={videoRef}
-        src={work.videoSrc}
         poster={work.thumbnailSrc}
         muted
         loop
@@ -86,7 +112,11 @@ function HeroBackdrop({
           transition: `opacity ${CROSSFADE_MS}ms ease`,
         }}
         aria-label={`${work.title} 背景视频`}
-      />
+      >
+        {buildVideoSources(work).map((s) => (
+          <source key={s.type} src={s.src} type={s.type} />
+        ))}
+      </video>
 
       {/* Scrim — keeps the centerpiece text readable over either layer */}
       <div
@@ -124,6 +154,9 @@ export function WorkIndex() {
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [isPaused, setIsPaused] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoOverlayOpen, setVideoOverlayOpen] = useState(false);
+
+  const isMobile = useIsMobile();
 
   /* Switching works always returns the backdrop to the static image. */
   useEffect(() => {
@@ -168,7 +201,7 @@ export function WorkIndex() {
 
   /* Autoplay — pauses on hover / focus / interaction. */
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || videoOverlayOpen) return;
     if (works.length < 2) return;
     const id = setInterval(() => {
       setActiveIndex((cur) => (cur + 1) % works.length);
@@ -202,7 +235,7 @@ export function WorkIndex() {
   const wheelLock = useRef(false);
   useEffect(() => {
     const navigate = (dir: 1 | -1) => {
-      if (wheelLock.current) return;
+      if (wheelLock.current || videoOverlayOpen) return;
       wheelLock.current = true;
       goTo(activeIndex + dir);
       window.setTimeout(() => {
@@ -248,7 +281,7 @@ export function WorkIndex() {
 
   return (
     <main
-      className="cinematic cinematic-bg relative h-dvh w-screen overflow-hidden"
+      className="cinematic cinematic-bg relative h-dvh w-full overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -258,8 +291,10 @@ export function WorkIndex() {
 
       {/* Play / pause the background video */}
       <PlayControl
+        isMobile={isMobile}
         isPlaying={isPlaying}
-        onToggle={() => setIsPlaying((p) => !p)}
+        onToggleBackground={() => setIsPlaying((p) => !p)}
+        onOpenOverlay={() => setVideoOverlayOpen(true)}
       />
 
       <VerticalTimeline
@@ -292,6 +327,11 @@ export function WorkIndex() {
             if (i >= 0) goTo(i);
           }}
         />
+      )}
+
+      {/* Mobile-only full-screen video player. */}
+      {videoOverlayOpen && (
+        <VideoOverlay work={current} onClose={() => setVideoOverlayOpen(false)} />
       )}
 
     </main>
@@ -397,12 +437,11 @@ function Centerpiece({
   return (
     <section
       aria-label="当前作品"
-      className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pb-32 pt-28 sm:pb-0 sm:pt-24"
-      style={{ right: "clamp(0px, 30vw, 460px)" }}
+      className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pb-32 pt-28 right-0 sm:pb-0 sm:pt-24 sm:right-[clamp(0px,30vw,460px)]"
     >
       <div
         className="pointer-events-auto w-full pl-[72px] pr-6 sm:pl-[120px] sm:pr-6"
-        style={{ maxWidth: "min(60ch, 64vw)" }}
+        style={{ maxWidth: "min(60ch, 82vw)" }}
       >
         {/* index chip */}
         <div
@@ -424,7 +463,7 @@ function Centerpiece({
           key={work.slug}
           className="display-headline text-[var(--paper-on-night)]"
           style={{
-            fontSize: "clamp(56px, 9.5vw, 168px)",
+            fontSize: "clamp(40px, 12vw, 168px)",
             textShadow:
               "0 4px 24px rgba(10,8,20,0.65), 0 16px 60px rgba(10,8,20,0.55)",
             animation: `hero-rise 800ms cubic-bezier(.2,.7,.3,1) both`,
@@ -436,7 +475,7 @@ function Centerpiece({
         {/* meta line */}
         <p
           key={`${work.slug}-meta`}
-          className="mt-5 max-w-[44ch] text-[15px] leading-relaxed text-[var(--paper-on-night)]/85 sm:mt-6 sm:text-[16px]"
+          className="mt-5 max-w-[40ch] text-[15px] leading-relaxed text-[var(--paper-on-night)]/85 sm:mt-6 sm:max-w-[44ch] sm:text-[16px]"
           style={{
             textShadow: "0 2px 14px rgba(10,8,20,0.7)",
             animation: `hero-rise 800ms 120ms cubic-bezier(.2,.7,.3,1) both`,
@@ -714,26 +753,43 @@ function taglineFor(work: Work): string {
  * image; once playing it becomes a pause control.
  * ---------------------------------------------------------------- */
 function PlayControl({
+  isMobile,
   isPlaying,
-  onToggle,
+  onToggleBackground,
+  onOpenOverlay,
 }: {
+  isMobile: boolean;
   isPlaying: boolean;
-  onToggle: () => void;
+  onToggleBackground: () => void;
+  onOpenOverlay: () => void;
 }) {
+  // On mobile the button opens a full-screen overlay player (the .mov
+  // sources don't play inline on small screens / Android, and an inline
+  // background video fights the carousel's swipe gestures). On desktop it
+  // toggles the cinematic background video as before.
+  const overlayMode = isMobile;
+  const active = overlayMode ? false : isPlaying;
+
   return (
     <button
       type="button"
-      onClick={onToggle}
-      aria-label={isPlaying ? "暂停背景视频" : "播放背景视频"}
-      aria-pressed={isPlaying}
-      className="focus-ring group absolute right-5 top-1/2 z-20 flex h-[72px] w-[72px] -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/[0.07] text-[var(--paper-on-night)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/[0.14] sm:h-[84px] sm:w-[84px]"
+      onClick={overlayMode ? onOpenOverlay : onToggleBackground}
+      aria-label={
+        active
+          ? "暂停背景视频"
+          : overlayMode
+            ? "全屏播放视频"
+            : "播放背景视频"
+      }
+      aria-pressed={active}
+      className="focus-ring group absolute right-4 bottom-6 z-20 flex h-[60px] w-[60px] items-center justify-center rounded-full border border-white/20 bg-white/[0.07] text-[var(--paper-on-night)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/[0.14] sm:right-5 sm:bottom-auto sm:top-1/2 sm:h-[84px] sm:w-[84px] sm:-translate-y-1/2"
     >
       {/* subtle inner ring */}
       <span
         aria-hidden
         className="absolute inset-1 rounded-full ring-1 ring-white/10 transition-all duration-300 group-hover:ring-white/25"
       />
-      {isPlaying ? <PauseIcon /> : <PlayIcon />}
+      {active ? <PauseIcon /> : <PlayIcon />}
     </button>
   );
 }
@@ -766,6 +822,130 @@ function PauseIcon() {
       <rect x="6.5" y="5" width="3.6" height="14" rx="1.2" />
       <rect x="13.9" y="5" width="3.6" height="14" rx="1.2" />
     </svg>
+  );
+}
+
+/* ----------------------------------------------------------------
+ * VideoOverlay — mobile-only full-screen player. Tapping play on a phone
+ * opens this modal instead of swapping in an inline background video.
+ * Unsupported formats (.mov on Android) fall back to a friendly message
+ * instead of a broken black frame, and the carousel gestures/autoplay are
+ * paused while it's open (see WorkIndex guards).
+ * ---------------------------------------------------------------- */
+function VideoOverlay({
+  work,
+  onClose,
+}: {
+  work: Work;
+  onClose: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+  const [unsupported, setUnsupported] = useState(false);
+
+  // Esc closes the overlay.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  // Probe format support before painting, then autoplay (muted, to satisfy
+  // the mobile autoplay policy). useLayoutEffect swaps to the fallback
+  // message pre-paint so there's no black-frame flash on unsupported devices.
+  useLayoutEffect(() => {
+    if (typeof document === "undefined") return;
+    const probe = document.createElement("video");
+    const playable = buildVideoSources(work).some((s) => {
+      const r = probe.canPlayType(s.type);
+      return r === "probably" || r === "maybe";
+    });
+    if (!playable) {
+      setUnsupported(true);
+      return;
+    }
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    const p = v.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {
+        /* autoplay blocked — native controls remain available */
+      });
+    }
+  }, [work.slug]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${work.title} 视频`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="关闭视频"
+        className="focus-ring absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[var(--paper-on-night)] backdrop-blur-md transition-colors hover:bg-white/20"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          aria-hidden
+        >
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+
+      <div
+        className="relative w-full max-w-[1000px] px-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {unsupported || failed ? (
+          <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+            <div className="relative aspect-video w-full">
+              <Image
+                src={work.thumbnailSrc}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+                style={{ filter: "brightness(0.7)" }}
+              />
+            </div>
+            <p className="px-5 py-4 text-center text-[14px] leading-relaxed text-[var(--paper-on-night)]/85">
+              当前设备暂不支持播放该视频。<br />
+              请使用其他浏览器或桌面端观看。
+            </p>
+          </div>
+        ) : (
+          <video
+            ref={videoRef}
+            poster={work.thumbnailSrc}
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            onError={() => setFailed(true)}
+            className="mx-auto max-h-[88vh] w-full rounded-xl"
+          >
+            {buildVideoSources(work).map((s) => (
+              <source key={s.type} src={s.src} type={s.type} />
+            ))}
+          </video>
+        )}
+      </div>
+    </div>
   );
 }
 
