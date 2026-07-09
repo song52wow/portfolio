@@ -26,7 +26,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Node 20 is being retired from GitHub Actions runners; use
+          # the current LTS (Node 24) which Next 16 supports natively.
+          node-version: "24"
           cache: "npm"
 
       - name: Install dependencies
@@ -46,6 +48,11 @@ jobs:
 
       - name: Setup Pages artifact
         uses: actions/configure-pages@v5
+        with:
+          # Auto-enable GitHub Pages on first run so the user doesn't
+          # have to flip the toggle in Settings manually. Safe to
+          # re-run on subsequent deploys.
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
