@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -158,11 +157,6 @@ export function WorkIndex() {
 
   const isMobile = useIsMobile();
 
-  /* Switching works always returns the backdrop to the static image. */
-  useEffect(() => {
-    setIsPlaying(false);
-  }, [activeIndex]);
-
   /* Keep route param in sync with active carousel index. */
   const pushFocus = useCallback(
     (idx: number) => {
@@ -185,6 +179,10 @@ export function WorkIndex() {
       const next = ((idx % n) + n) % n;
       if (next === activeIndex) return;
       setActiveIndex(next);
+      /* Switching works always returns the backdrop to the static image.
+         Set directly here (in the user-action handler) rather than via a
+         reactive effect, which would be a cascading-render anti-pattern. */
+      setIsPlaying(false);
     },
     [activeIndex],
   );
@@ -207,7 +205,7 @@ export function WorkIndex() {
       setActiveIndex((cur) => (cur + 1) % works.length);
     }, AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [isPaused]);
+  }, [isPaused, videoOverlayOpen]);
 
   /* Lock body scroll — single-screen carousel experience. */
   useEffect(() => {
@@ -234,8 +232,9 @@ export function WorkIndex() {
      the reference's intent). One gesture = one navigation (throttled). */
   const wheelLock = useRef(false);
   useEffect(() => {
+    if (videoOverlayOpen) return;
     const navigate = (dir: 1 | -1) => {
-      if (wheelLock.current || videoOverlayOpen) return;
+      if (wheelLock.current) return;
       wheelLock.current = true;
       goTo(activeIndex + dir);
       window.setTimeout(() => {
@@ -264,7 +263,7 @@ export function WorkIndex() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
     };
-  }, [goTo, activeIndex]);
+  }, [goTo, activeIndex, videoOverlayOpen]);
 
   if (works.length === 0) {
     return (
@@ -298,7 +297,6 @@ export function WorkIndex() {
       />
 
       <VerticalTimeline
-        total={total}
         activeIndex={activeIndex}
         onSelect={(i) => {
           setIsPaused(true);
@@ -341,12 +339,10 @@ export function WorkIndex() {
 /* ---------------------------------------------------------------- */
 
 function VerticalTimeline({
-  total: _total,
   activeIndex,
   onSelect,
   works,
 }: {
-  total: number;
   activeIndex: number;
   onSelect: (i: number) => void;
   works: Work[];
@@ -841,7 +837,18 @@ function VideoOverlay({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
-  const [unsupported, setUnsupported] = useState(false);
+  /* `unsupported` is computed once on mount via useState's lazy initializer.
+   * The parent component remounts <VideoOverlay> on each open, so this
+   * probe always runs against the active work — no setState-in-effect
+   * cascade needed. */
+  const [unsupported] = useState(() => {
+    if (typeof document === "undefined") return false;
+    const probe = document.createElement("video");
+    return !buildVideoSources(work).some((s) => {
+      const r = probe.canPlayType(s.type);
+      return r === "probably" || r === "maybe";
+    });
+  });
 
   // Esc closes the overlay.
   useEffect(() => {
@@ -852,20 +859,11 @@ function VideoOverlay({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // Probe format support before painting, then autoplay (muted, to satisfy
-  // the mobile autoplay policy). useLayoutEffect swaps to the fallback
-  // message pre-paint so there's no black-frame flash on unsupported devices.
-  useLayoutEffect(() => {
-    if (typeof document === "undefined") return;
-    const probe = document.createElement("video");
-    const playable = buildVideoSources(work).some((s) => {
-      const r = probe.canPlayType(s.type);
-      return r === "probably" || r === "maybe";
-    });
-    if (!playable) {
-      setUnsupported(true);
-      return;
-    }
+  /* Autoplay (muted, to satisfy the mobile autoplay policy). Skipped on
+   * unsupported devices — the JSX renders a friendly fallback message
+   * instead. */
+  useEffect(() => {
+    if (unsupported) return;
     const v = videoRef.current;
     if (!v) return;
     v.muted = true;
@@ -875,7 +873,7 @@ function VideoOverlay({
         /* autoplay blocked — native controls remain available */
       });
     }
-  }, [work.slug]);
+  }, [unsupported]);
 
   return (
     <div

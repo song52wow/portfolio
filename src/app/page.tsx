@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { WorkIndex } from "@/components/WorkIndex";
-import { works } from "@/data/works";
 
 export const metadata: Metadata = {
   title: "作品集 / EXHIBITION WORKS",
