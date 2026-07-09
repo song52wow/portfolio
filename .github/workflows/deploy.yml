@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Required for the `actions/deploy-pages` step to publish to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Avoid concurrent deploys stepping on each other.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check & lint (fail fast on regressions)
+        run: |
+          npx tsc --noEmit
+          npm run lint
+
+      - name: Build static site
+        # NODE_ENV=production triggers the production basePath in
+        # next.config.ts (see `isProd` branch).
+        env:
+          NODE_ENV: production
+        run: npm run build
+
+      - name: Setup Pages artifact
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # The `out/` directory is the standard Next.js static export
+          # output. See `output: "export"` in next.config.ts.
+          path: "./out"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

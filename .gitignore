@@ -62,3 +62,4 @@ next-env.d.ts
 /docs/screenshots/carousel/after-fix-*.png
 /docs/screenshots/carousel/final-*.png
 # tracked screenshots live under docs/screenshots/** (carousel/, resume/, references/, …)
+/.workbuddy/
