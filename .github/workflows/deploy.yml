@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Required for the `actions/deploy-pages` step to publish to Pages.
+# Required for `actions/deploy-pages` to publish to Pages.
 permissions:
   contents: read
   pages: write
@@ -15,6 +15,13 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: false
+
+# PAGES MUST BE ENABLED MANUALLY ONCE before this workflow can deploy:
+#   Repo → Settings → Pages → Source = "GitHub Actions"
+# The `enablement: true` flag on `actions/configure-pages` tries to do
+# this automatically, but on repos with stricter org/repo policies it
+# fails with "Resource not accessible by integration". One-time manual
+# enablement sidesteps that and unlocks all subsequent deploys.
 
 jobs:
   build:
@@ -46,14 +53,6 @@ jobs:
           NODE_ENV: production
         run: npm run build
 
-      - name: Setup Pages artifact
-        uses: actions/configure-pages@v5
-        with:
-          # Auto-enable GitHub Pages on first run so the user doesn't
-          # have to flip the toggle in Settings manually. Safe to
-          # re-run on subsequent deploys.
-          enablement: true
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -66,8 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: https://song52wow.github.io/portfolio/
     steps:
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
