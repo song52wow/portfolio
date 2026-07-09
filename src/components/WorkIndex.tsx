@@ -14,6 +14,11 @@ import { works, type Work } from "@/data/works";
 const AUTOPLAY_MS = 8000;
 const CROSSFADE_MS = 600;
 
+/* Same basePath rationale as src/data/works.ts — see the comment there
+ * and next.config.ts → `env.NEXT_PUBLIC_BASE_PATH`. Used for the
+ * cinematic-hero background image hardcoded below. */
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 /* Toggle the right-side thumbnail stack on/off. Set to true to bring it
  * back. Currently hidden per request. */
 const SHOW_THUMBNAILS = false;
@@ -638,7 +643,7 @@ function ThumbCard({
       }}
     >
       <Image
-        src="/images/cinematic-hero.jpg"
+        src={`${BASE}/images/cinematic-hero.jpg`}
         alt=""
         fill
         priority

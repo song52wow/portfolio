@@ -29,6 +29,17 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+
+  /* basePath only auto-prefixes `<Link>`/`<Image>` (and even Image needs
+   * manual prefixing per the docs). Raw strings used in `<video src>`,
+   * `<source src>`, and user-data paths in src/data/works.ts are NOT
+   * prefixed. Expose the basePath as a build-time env var so user code
+   * can compose correct URLs in static export. NEXT_PUBLIC_* is inlined
+   * into the client bundle at build time, which is what we want for
+   * static export (no runtime access to process.env). */
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProd ? `/${REPO_NAME}` : "",
+  },
 };
 
 export default nextConfig;
