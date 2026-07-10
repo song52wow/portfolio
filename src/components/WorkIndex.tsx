@@ -111,8 +111,14 @@ function HeroBackdrop({
         }}
       />
 
-      {/* Video — plays full-screen when isPlaying, covers the image */}
+      {/* Video — plays full-screen when isPlaying, covers the image.
+          key={work.slug} forces React to remount the element whenever
+          the active work changes; without it the <source> children are
+          swapped in-place and the browser keeps the OLD video loaded
+          (since <source> attribute changes do NOT trigger a reload),
+          so v.play() ends up playing the previous project's video. */}
       <video
+        key={work.slug}
         ref={videoRef}
         poster={work.thumbnailSrc}
         muted
@@ -218,15 +224,17 @@ export function WorkIndex({
     pushFocus(activeIndex);
   }, [activeIndex, pushFocus]);
 
-  /* Autoplay — pauses on hover / focus / interaction. */
+  /* Autoplay — pauses on hover / focus / interaction, and also while
+   * the background video is actively playing (otherwise the 8s timer
+   * would yank the user to the next project mid-playback). */
   useEffect(() => {
-    if (isPaused || videoOverlayOpen) return;
+    if (isPaused || isPlaying || videoOverlayOpen) return;
     if (works.length < 2) return;
     const id = setInterval(() => {
       setActiveIndex((cur) => (cur + 1) % works.length);
     }, AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [isPaused, videoOverlayOpen]);
+  }, [isPaused, isPlaying, videoOverlayOpen]);
 
   /* Lock body scroll — single-screen carousel experience. */
   useEffect(() => {
@@ -954,6 +962,7 @@ function VideoOverlay({
           </div>
         ) : (
           <video
+            key={work.slug}
             ref={videoRef}
             poster={work.thumbnailSrc}
             controls
