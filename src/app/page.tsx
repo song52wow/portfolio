@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import { WorkIndex } from "@/components/WorkIndex";
+import { ExhibitionLoader } from "@/components/ExhibitionLoader";
 
 export const metadata: Metadata = {
   title: "作品集 / EXHIBITION WORKS",
@@ -12,20 +12,22 @@ export const metadata: Metadata = {
   },
 };
 
+function SimpleLoading() {
+  return (
+    <div className="grid min-h-dvh place-items-center">
+      <p className="catalog-num text-[11px] text-[var(--mute-on-night)]">
+        Loading…
+      </p>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
       <SiteHeader />
-      <Suspense
-        fallback={
-          <div className="grid min-h-dvh place-items-center">
-            <p className="catalog-num text-[11px] text-[var(--mute-on-night)]">
-              Loading index…
-            </p>
-          </div>
-        }
-      >
-        <WorkIndex />
+      <Suspense fallback={<SimpleLoading />}>
+        <ExhibitionLoader />
       </Suspense>
     </>
   );

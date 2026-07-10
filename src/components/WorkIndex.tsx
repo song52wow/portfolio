@@ -42,7 +42,17 @@ function useIsMobile() {
  * on iOS / Android / desktop Chrome); the original .mov is kept as a
  * Safari/legacy fallback. Order matters — browsers pick the first they
  * can play. */
-function buildVideoSources(work: Work): { src: string; type: string }[] {
+function buildVideoSources(
+  work: Work,
+  objectUrls?: Record<string, string>,
+): { src: string; type: string }[] {
+  // Prefer the in-memory copy produced by the preloader so we never
+  // download a video twice.
+  const preloaded = objectUrls?.[work.slug];
+  if (preloaded) {
+    const isMp4 = (work.videoMp4Src ?? work.videoSrc).endsWith(".mp4");
+    return [{ src: preloaded, type: isMp4 ? "video/mp4" : "video/quicktime" }];
+  }
   const list: { src: string; type: string }[] = [];
   if (work.videoMp4Src) list.push({ src: work.videoMp4Src, type: "video/mp4" });
   list.push({ src: work.videoSrc, type: "video/quicktime" });
@@ -59,9 +69,11 @@ function buildVideoSources(work: Work): { src: string; type: string }[] {
 function HeroBackdrop({
   work,
   isPlaying,
+  objectUrls,
 }: {
   work: Work;
   isPlaying: boolean;
+  objectUrls?: Record<string, string>;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -117,7 +129,7 @@ function HeroBackdrop({
         }}
         aria-label={`${work.title} 背景视频`}
       >
-        {buildVideoSources(work).map((s) => (
+        {buildVideoSources(work, objectUrls).map((s) => (
           <source key={s.type} src={s.src} type={s.type} />
         ))}
       </video>
@@ -144,7 +156,11 @@ function HeroBackdrop({
  * - A vertical timeline on the left mirrors the carousel index
  * - The pager at the bottom supports manual and keyboard navigation
  * ---------------------------------------------------------------- */
-export function WorkIndex() {
+export function WorkIndex({
+  videoObjectUrls,
+}: {
+  videoObjectUrls?: Record<string, string>;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -291,7 +307,7 @@ export function WorkIndex() {
     >
       {/* Hero backdrop — current work's static image, or its video
           when playing. */}
-      <HeroBackdrop work={current} isPlaying={isPlaying} />
+      <HeroBackdrop work={current} isPlaying={isPlaying} objectUrls={videoObjectUrls} />
 
       {/* Play / pause the background video */}
       <PlayControl
@@ -334,7 +350,11 @@ export function WorkIndex() {
 
       {/* Mobile-only full-screen video player. */}
       {videoOverlayOpen && (
-        <VideoOverlay work={current} onClose={() => setVideoOverlayOpen(false)} />
+        <VideoOverlay
+          work={current}
+          onClose={() => setVideoOverlayOpen(false)}
+          objectUrls={videoObjectUrls}
+        />
       )}
 
     </main>
@@ -836,9 +856,11 @@ function PauseIcon() {
 function VideoOverlay({
   work,
   onClose,
+  objectUrls,
 }: {
   work: Work;
   onClose: () => void;
+  objectUrls?: Record<string, string>;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
@@ -942,7 +964,7 @@ function VideoOverlay({
             onError={() => setFailed(true)}
             className="mx-auto max-h-[88vh] w-full rounded-xl"
           >
-            {buildVideoSources(work).map((s) => (
+            {buildVideoSources(work, objectUrls).map((s) => (
               <source key={s.type} src={s.src} type={s.type} />
             ))}
           </video>
