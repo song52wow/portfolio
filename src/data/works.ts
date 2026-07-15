@@ -46,6 +46,17 @@ export const works: Work[] = [
   },
   {
     id: "3",
+    slug: "pump",
+    title: "Pump",
+    description:
+      "基于 Base 网络的去中心化代币启动平台，专注文化币 / Meme 币 / 社区驱动型数字资产的无许可发行与交易，配套 PC + 钱包内 DApp 双端访问。",
+    videoSrc: `${BASE}/videos/pump.mp4`,
+    thumbnailSrc: `${BASE}/images/pump.png`,
+    tags: ["DAPP", "WEB3", "LAUNCHPAD", "BASE"],
+    year: 2025,
+  },
+  {
+    id: "4",
     slug: "extension",
     title: "Extension Purse",
     description:
