@@ -478,6 +478,34 @@ function Centerpiece({
   const [highlightsOpen, setHighlightsOpen] = useState(false);
   const hasHighlights = (work.highlights?.length ?? 0) > 0;
 
+  /* Explore CTA — render as <a target="_blank"> when the work has an
+   * externalUrl (e.g. CupOracle's live site), otherwise stay as a
+   * button that focuses the carousel route. The same `btn-ember` style
+   * works for both, so the visual stays consistent. */
+  const exploreLabel = work.externalUrl ? "Visit Site" : "Explore";
+  const ExploreCta = work.externalUrl ? (
+    <a
+      href={work.externalUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`打开 ${work.title} 外部链接`}
+      className="btn-ember focus-ring"
+    >
+      <span>{exploreLabel}</span>
+      <ExternalArrowCircle />
+    </a>
+  ) : (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`查看 ${work.title}`}
+      className="btn-ember focus-ring"
+    >
+      <span>{exploreLabel}</span>
+      <ArrowCircle />
+    </button>
+  );
+
   return (
     <section
       aria-label="当前作品"
@@ -530,20 +558,25 @@ function Centerpiece({
 
         {/* Tech highlights — hidden by default, expands on hover/focus
             for the active work. Bounded so the carousel layout stays
-            single-screen on tall portrait phones. */}
+            single-screen on tall portrait phones. Entrance animation
+            mirrors the rest of the hero stack so the panel arrives in
+            step with the title / description. */}
         {hasHighlights && (
           <div
             key={`${work.slug}-hl`}
             className="mt-4 max-w-[40ch] sm:mt-5 sm:max-w-[44ch]"
             onMouseEnter={() => setHighlightsOpen(true)}
             onMouseLeave={() => setHighlightsOpen(false)}
+            style={{
+              animation: `hero-rise 800ms 180ms cubic-bezier(.2,.7,.3,1) both`,
+            }}
           >
             <button
               type="button"
               onClick={() => setHighlightsOpen((s) => !s)}
               aria-expanded={highlightsOpen}
               aria-controls={`${work.slug}-hl-list`}
-              className="focus-ring inline-flex items-center gap-2 rounded-sm text-[10px] uppercase tracking-[0.18em] text-[var(--paper-on-night)]/50 transition-colors duration-200 hover:text-[var(--paper-on-night)]/85"
+              className="focus-ring inline-flex items-center gap-2 rounded-sm text-[10px] uppercase tracking-[0.18em] text-[var(--paper-on-night)]/55 transition-colors duration-200 hover:text-[var(--paper-on-night)]/90"
               style={{ fontFamily: "var(--font-mono)" }}
             >
               <span
@@ -554,7 +587,7 @@ function Centerpiece({
                 ▸
               </span>
               <span>Tech Highlights</span>
-              <span aria-hidden className="opacity-50">
+              <span aria-hidden className="opacity-60">
                 ({work.highlights!.length})
               </span>
             </button>
@@ -582,36 +615,47 @@ function Centerpiece({
           </div>
         )}
 
-        {/* footer: CTA + tags */}
+        {/* footer: CTA + tags. Layout is stacked vertically — CTA on its
+            own row, tags as chips on the row below — so the relationship
+            reads cleanly across all four projects regardless of how
+            many tags each carries. */}
         <div
           key={`${work.slug}-cta`}
-          className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mt-9"
+          className="mt-7 sm:mt-9"
           style={{
-            animation: `hero-rise 800ms 220ms cubic-bezier(.2,.7,.3,1) both`,
+            animation: `hero-rise 800ms 260ms cubic-bezier(.2,.7,.3,1) both`,
           }}
         >
-          <button
-            type="button"
-            onClick={onOpen}
-            aria-label={`查看 ${work.title}`}
-            className="btn-ember focus-ring"
-          >
-            <span>Explore</span>
-            <ArrowCircle />
-          </button>
+          {ExploreCta}
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <div
+            className="mt-3.5 flex flex-wrap gap-2"
+            aria-label="技术标签"
+          >
             {work.tags?.slice(0, 3).map((t) => (
               <span
                 key={t}
-                className="catalog-num text-[10px] text-[var(--paper-on-night)]/70"
+                className="catalog-num inline-flex items-center rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-[0.1em] text-[var(--paper-on-night)]/75"
+                style={{ fontFamily: "var(--font-mono)" }}
               >
-                · {t}
+                {t}
               </span>
             ))}
+            {work.tags && work.tags.length > 3 && (
+              <span
+                className="catalog-num inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] tracking-[0.1em] text-[var(--paper-on-night)]/55"
+                style={{ fontFamily: "var(--font-mono)" }}
+                title={work.tags.slice(3).join(" · ")}
+              >
+                +{work.tags.length - 3}
+              </span>
+            )}
             {work.year !== undefined && (
-              <span className="catalog-num text-[10px] text-[var(--paper-on-night)]/70">
-                · {work.year}
+              <span
+                className="catalog-num inline-flex items-center rounded-full border border-[var(--ember)]/35 bg-[var(--ember)]/10 px-2.5 py-1 text-[10px] tracking-[0.1em] text-[var(--ember)]/90"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                {work.year}
               </span>
             )}
           </div>
@@ -639,6 +683,31 @@ function ArrowCircle() {
       >
         <path d="M5 12h14" />
         <path d="m13 6 6 6-6 6" />
+      </svg>
+    </span>
+  );
+}
+
+/* Diagonal arrow — signals an off-site jump for the external-link
+ * variant of the Explore CTA (CupOracle → cuporacle.xyz). */
+function ExternalArrowCircle() {
+  return (
+    <span
+      aria-hidden
+      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--paper-on-night)] text-[var(--ember)]"
+    >
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M7 17 17 7" />
+        <path d="M8 7h9v9" />
       </svg>
     </span>
   );

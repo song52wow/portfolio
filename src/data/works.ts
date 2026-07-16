@@ -12,6 +12,9 @@ export type Work = {
   thumbnailSrc: string;
   tags?: string[];
   year?: number;
+  /** When set, the Explore CTA opens this URL in a new tab instead of
+   *  scrolling within the carousel. Use for live-deployed products. */
+  externalUrl?: string;
 };
 
 /* basePath is injected at build time via NEXT_PUBLIC_BASE_PATH (see
@@ -23,27 +26,14 @@ export type Work = {
  *  - In prod (GitHub Pages at /portfolio): "/portfolio" → /portfolio/videos/foo.mp4 */
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
+/* Display order matches the resume: newest project first, oldest last.
+ *  - CupOracle: 2026.06 — ongoing
+ *  - Pump:      2024.08 — 2026.01
+ *  - Extension Purse: 2024.08 — 2024.11  (X/Twitter AI annotator)
+ *  - BaaBaaBet: 2022.05 — 2023.06        (Web3 prediction DApp) */
 export const works: Work[] = [
   {
     id: "1",
-    slug: "baabaabet",
-    title: "BaaBaaBet",
-    description:
-      "覆盖赛事大厅、盘口下单、链上交易、CreateEvent、Membership NFT 的 Web3 链上预测 DApp，多链并行 + 多钱包接入。",
-    highlights: [
-      "Vite (主链) + Vue CLI 5 (子链) 共用 common workspace 多链并行架构",
-      "自研 abi-types-generator 一键生成多份合约 TS 类型客户端",
-      "ethers v5 + WalletConnect v1 + MetaMask 多钱包统一接入",
-      "PIXI.js v7 老虎机 / GSAP Business + Lottie 动效 / ECharts + Highcharts",
-    ],
-    videoSrc: `${BASE}/videos/baabaabet.mov`,
-    videoMp4Src: `${BASE}/videos/baabaabet.mp4`,
-    thumbnailSrc: `${BASE}/images/baabaabet.png`,
-    tags: ["DAPP", "WEB3", "PREDICTION", "VITE", "PIXI.JS", "GRAPHQL", "ETHERS"],
-    year: 2023,
-  },
-  {
-    id: "2",
     slug: "cuporacle",
     title: "CupOracle",
     description:
@@ -59,9 +49,10 @@ export const works: Work[] = [
     thumbnailSrc: `${BASE}/images/cuporacle.png`,
     tags: ["AI", "PREDICTION", "NEXT.JS 14", "CLOUDFLARE", "D1", "HONO", "ECHARTS"],
     year: 2026,
+    externalUrl: "https://cuporacle.xyz/",
   },
   {
-    id: "3",
+    id: "2",
     slug: "pump",
     title: "Pump",
     description:
@@ -80,7 +71,7 @@ export const works: Work[] = [
     year: 2026,
   },
   {
-    id: "4",
+    id: "3",
     slug: "extension-purse",
     title: "Extension Purse",
     description:
@@ -97,6 +88,24 @@ export const works: Work[] = [
     thumbnailSrc: `${BASE}/images/extension-purse.png`,
     tags: ["EXTENSION", "CHROME MV3", "AI", "TWITTER", "MARK.JS", "GSAP", "TURBO"],
     year: 2024,
+  },
+  {
+    id: "4",
+    slug: "baabaabet",
+    title: "BaaBaaBet",
+    description:
+      "覆盖赛事大厅、盘口下单、链上交易、CreateEvent、Membership NFT 的 Web3 链上预测 DApp，多链并行 + 多钱包接入。",
+    highlights: [
+      "Vite (主链) + Vue CLI 5 (子链) 共用 common workspace 多链并行架构",
+      "自研 abi-types-generator 一键生成多份合约 TS 类型客户端",
+      "ethers v5 + WalletConnect v1 + MetaMask 多钱包统一接入",
+      "PIXI.js v7 老虎机 / GSAP Business + Lottie 动效 / ECharts + Highcharts",
+    ],
+    videoSrc: `${BASE}/videos/baabaabet.mov`,
+    videoMp4Src: `${BASE}/videos/baabaabet.mp4`,
+    thumbnailSrc: `${BASE}/images/baabaabet.png`,
+    tags: ["DAPP", "WEB3", "PREDICTION", "VITE", "PIXI.JS", "GRAPHQL", "ETHERS"],
+    year: 2023,
   },
 ];
 
