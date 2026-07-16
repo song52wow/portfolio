@@ -380,12 +380,37 @@ function VerticalTimeline({
   onSelect: (i: number) => void;
   works: Work[];
 }) {
+  // Node centers are placed at (i + 0.5) / N of the container height so that
+  // connector lines (positioned at the same fraction + dot radius) line up
+  // exactly with each dot. Both elements reference the SAME container, so
+  // the line height math (100/N%) stays consistent at every viewport size.
+  const n = works.length;
   return (
     <aside
       aria-label="作品时间线"
       className="pointer-events-none absolute inset-y-0 left-0 z-20 flex w-[58px] items-center justify-center"
     >
-      <div className="relative flex h-[68%] flex-col items-center justify-between">
+      <div className="relative h-[68%] w-full">
+        {/* Connector lines between nodes */}
+        {works.slice(0, -1).map((_, i) => {
+          const reached = i < activeIndex;
+          return (
+            <span
+              key={`line-${i}`}
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 w-px -translate-x-1/2"
+              style={{
+                top: `calc(${(i + 0.5) * (100 / n)}% + 7px)`,
+                height: `calc(${100 / n}% - 14px)`,
+                background: reached
+                  ? "var(--ember)"
+                  : "rgba(244,236,217,0.12)",
+              }}
+            />
+          );
+        })}
+        {/* Nodes — absolutely positioned so their CENTERS land on the same
+            (i + 0.5) / N fractions the connector lines assume. */}
         {works.map((w, i) => {
           const isActive = i === activeIndex;
           const isPast = i < activeIndex;
@@ -396,7 +421,10 @@ function VerticalTimeline({
               onClick={() => onSelect(i)}
               aria-label={`跳到 ${w.title}`}
               aria-current={isActive ? "true" : undefined}
-              className="focus-ring group pointer-events-auto relative flex h-7 w-7 items-center justify-center rounded-full"
+              className="focus-ring group pointer-events-auto absolute left-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full"
+              style={{
+                top: `calc(${(i + 0.5) * (100 / n)}%)`,
+              }}
             >
               <span aria-hidden className="absolute inset-0 -m-1 rounded-full" />
               <span
@@ -423,26 +451,6 @@ function VerticalTimeline({
                 {w.title}
               </span>
             </button>
-          );
-        })}
-      </div>
-      {/* Connector lines between nodes */}
-      <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2">
-        {works.slice(0, -1).map((_, i) => {
-          const reached = i < activeIndex;
-          return (
-            <span
-              key={i}
-              aria-hidden
-              className="absolute left-1/2 w-px -translate-x-1/2"
-              style={{
-                top: `calc(${(i + 0.5) * (100 / works.length)}% + 6px)`,
-                height: `calc(${100 / works.length}% - 12px)`,
-                background: reached
-                  ? "var(--ember)"
-                  : "rgba(244,236,217,0.12)",
-              }}
-            />
           );
         })}
       </div>
