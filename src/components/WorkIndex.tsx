@@ -471,6 +471,13 @@ function Centerpiece({
   total: number;
   onOpen: () => void;
 }) {
+  /* Hover/click-expand the highlights panel. Two triggers so it works
+   * on both pointer (hover) and touch/keyboard (click). `key={work.slug}`
+   * on the wrapper below remounts the component per work, which naturally
+   * resets this state. */
+  const [highlightsOpen, setHighlightsOpen] = useState(false);
+  const hasHighlights = (work.highlights?.length ?? 0) > 0;
+
   return (
     <section
       aria-label="当前作品"
@@ -520,6 +527,60 @@ function Centerpiece({
         >
           {work.description}
         </p>
+
+        {/* Tech highlights — hidden by default, expands on hover/focus
+            for the active work. Bounded so the carousel layout stays
+            single-screen on tall portrait phones. */}
+        {hasHighlights && (
+          <div
+            key={`${work.slug}-hl`}
+            className="mt-4 max-w-[40ch] sm:mt-5 sm:max-w-[44ch]"
+            onMouseEnter={() => setHighlightsOpen(true)}
+            onMouseLeave={() => setHighlightsOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setHighlightsOpen((s) => !s)}
+              aria-expanded={highlightsOpen}
+              aria-controls={`${work.slug}-hl-list`}
+              className="focus-ring inline-flex items-center gap-2 rounded-sm text-[10px] uppercase tracking-[0.18em] text-[var(--paper-on-night)]/50 transition-colors duration-200 hover:text-[var(--paper-on-night)]/85"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-200"
+                style={{ transform: highlightsOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+              >
+                ▸
+              </span>
+              <span>Tech Highlights</span>
+              <span aria-hidden className="opacity-50">
+                ({work.highlights!.length})
+              </span>
+            </button>
+
+            <div
+              id={`${work.slug}-hl-list`}
+              role="region"
+              aria-label={`${work.title} 技术亮点`}
+              className="grid transition-[grid-template-rows] duration-300 ease-out"
+              style={{
+                gridTemplateRows: highlightsOpen ? "1fr" : "0fr",
+              }}
+            >
+              <ul className="min-h-0 overflow-hidden">
+                <ul className="mt-2.5 space-y-1.5 pb-1 text-[12.5px] leading-snug text-[var(--paper-on-night)]/75 sm:text-[13px]">
+                  {work.highlights!.map((h, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--ember)]/80" />
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* footer: CTA + tags */}
         <div
