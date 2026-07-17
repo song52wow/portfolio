@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -445,8 +446,9 @@ function VerticalTimeline({
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 whitespace-nowrap text-[10px] uppercase tracking-[0.18em] text-[var(--mute-on-night)] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                className="pointer-events-none absolute left-full top-1/2 ml-3 hidden -translate-y-1/2 max-w-[180px] truncate text-[10px] uppercase tracking-[0.18em] text-[var(--mute-on-night)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:block"
                 style={{ fontFamily: "var(--font-mono)" }}
+                title={w.title}
               >
                 {w.title}
               </span>
@@ -513,7 +515,7 @@ function Centerpiece({
     >
       <div
         className="pointer-events-auto w-full pl-[72px] pr-6 sm:pl-[120px] sm:pr-6"
-        style={{ maxWidth: "min(60ch, 82vw)" }}
+        style={{ maxWidth: "min(88ch, 92vw)" }}
       >
         {/* index chip */}
         <div
@@ -530,19 +532,23 @@ function Centerpiece({
           </span>
         </div>
 
-        {/* giant title — clamp ensures no horizontal overflow, size scales with viewport */}
-        <h1
+        {/* giant title — single-line; font size auto-fits between [minSize, maxSize]
+           * so long CJK titles (e.g. 「浏览器插件(社交推文 AI 标注)」) shrink instead of
+           * wrapping. See AutosizeHeadline below for the measurement algorithm.
+           * `key={work.slug}` re-mounts the component on work change so the entrance
+           * animation re-fires and the size is re-measured for the new string. */}
+        <AutosizeHeadline
           key={work.slug}
-          className="display-headline text-[var(--paper-on-night)]"
+          text={work.title}
+          minSize={36}
+          maxSize={104}
+          title={work.title}
           style={{
-            fontSize: "clamp(40px, 12vw, 168px)",
             textShadow:
               "0 4px 24px rgba(10,8,20,0.65), 0 16px 60px rgba(10,8,20,0.55)",
             animation: `hero-rise 800ms cubic-bezier(.2,.7,.3,1) both`,
           }}
-        >
-          {work.title}
-        </h1>
+        />
 
         {/* meta line */}
         <p
@@ -662,6 +668,120 @@ function Centerpiece({
         </div>
       </div>
     </section>
+  );
+}
+
+/* ----------------------------------------------------------------
+ * AutosizeHeadline — auto-shrink a single-line heading to fit its
+ * container width. Algorithm:
+ *   1. Try maxSize. If scrollWidth <= clientWidth → done.
+ *   2. Otherwise scale down linearly as a first estimate, then binary
+ *      search within [minSize, estimate] to land on the largest size
+ *      that still fits (font widths aren't strictly linear under the
+ *      webfont hinting, so the linear guess is just a starting point).
+ *   3. Floor at minSize — if the string still overflows at minSize,
+ *      we keep minSize and let the layout absorb the overflow rather
+ *      than truncate or wrap (the parent uses pointer-events: none
+ *      over the right gutter so visual spillover is harmless).
+ * Re-fires on container resize (ResizeObserver) and on text change.
+ * Font readiness is awaited once so the measurement is post-hinting.
+ * ---------------------------------------------------------------- */
+function AutosizeHeadline({
+  text,
+  minSize,
+  maxSize,
+  title,
+  className,
+  style,
+}: {
+  text: string;
+  minSize: number;
+  maxSize: number;
+  title?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const [size, setSize] = useState<number>(maxSize);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    let raf = 0;
+    const fit = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        // Reset to max and read natural single-line width.
+        el.style.fontSize = `${maxSize}px`;
+        if (el.scrollWidth <= el.clientWidth + 1) {
+          setSize(maxSize);
+          return;
+        }
+
+        // Linear estimate: target = maxSize * (client / natural).
+        const ratio = el.clientWidth / el.scrollWidth;
+        const estimate = Math.max(minSize, maxSize * ratio);
+        el.style.fontSize = `${estimate}px`;
+
+        // Refine via binary search — CJK fallback font widths can
+        // drift from linear, so the estimate may still overflow.
+        if (el.scrollWidth > el.clientWidth + 1) {
+          let lo = minSize;
+          let hi = estimate;
+          let best = minSize;
+          for (let i = 0; i < 14; i++) {
+            const mid = (lo + hi) / 2;
+            el.style.fontSize = `${mid}px`;
+            if (el.scrollWidth <= el.clientWidth + 1) {
+              best = mid;
+              lo = mid;
+            } else {
+              hi = mid;
+            }
+            if (hi - lo < 0.5) break;
+          }
+          el.style.fontSize = `${best}px`;
+          setSize(best);
+        } else {
+          setSize(estimate);
+        }
+      });
+    };
+
+    fit();
+
+    // Re-measure once webfonts settle — CJK falls back to a system font
+    // whose metrics may differ from the latin Bricolage measurement.
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(fit).catch(() => {});
+    }
+
+    const ro = new ResizeObserver(fit);
+    ro.observe(node);
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [text, minSize, maxSize]);
+
+  return (
+    <h1
+      ref={ref}
+      className={className ?? "display-headline text-[var(--paper-on-night)]"}
+      title={title}
+      style={{
+        whiteSpace: "nowrap",
+        fontSize: `${size}px`,
+        ...style,
+      }}
+    >
+      {text}
+    </h1>
   );
 }
 
@@ -870,6 +990,7 @@ function ThumbCard({
           <h3
             className="truncate text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[var(--paper-on-night)]"
             style={{ fontFamily: "var(--font-display)" }}
+            title={work.title}
           >
             {work.title}
           </h3>

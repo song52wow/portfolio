@@ -162,8 +162,9 @@ export default function ResumePage() {
                 >
                   <div className="min-w-0 flex-1">
                     <span
-                      className="text-[16px] font-semibold tracking-[-0.02em] text-[var(--paper-on-night)]"
+                      className="line-clamp-2 text-[16px] font-semibold leading-snug tracking-[-0.02em] text-[var(--paper-on-night)]"
                       style={{ fontFamily: "var(--font-display)" }}
+                      title={w.title}
                     >
                       {w.title}
                     </span>
