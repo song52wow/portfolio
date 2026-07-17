@@ -27,7 +27,16 @@ export async function preloadVideos(
   }
 
   const report = () => {
-    const loaded = Object.values(loadedMap).reduce((a, b) => a + b, 0);
+    // Clamp each source's contribution at its current best-known total so a
+    // chunk that lands before the Content-Length header can't inflate `loaded`
+    // past what we know to be its true ceiling. Combined with `grandTotal`
+    // growing in lockstep as headers arrive, this keeps loaded/total
+    // monotonic — the bar never spikes and falls mid-stream.
+    let loaded = 0;
+    for (const slug of Object.keys(loadedMap)) {
+      const known = totals[slug] ?? 0;
+      loaded += Math.min(loadedMap[slug], known);
+    }
     onProgress(loaded, grandTotal);
   };
   report();

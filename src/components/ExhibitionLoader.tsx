@@ -31,7 +31,10 @@ export function ExhibitionLoader() {
     preloadVideos(sources, (loaded, total) => {
       if (cancelled) return;
       const pct = total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
-      setProgress(pct);
+      // Defense-in-depth: belt-and-suspenders monotonic clamp. Even if a
+      // future change to preloadVideos introduces another racy report, the
+      // displayed percentage must never go backwards.
+      setProgress((prev) => Math.max(prev, pct));
     })
       .then((map) => {
         if (cancelled) return;
