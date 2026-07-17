@@ -11,7 +11,7 @@ npm run build
 npm run start
 ```
 
-开发服务器默认地址：http://localhost:3000
+开发服务器默认地址：http://localhost:3100
 
 ## 目录结构
 
