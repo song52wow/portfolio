@@ -47,10 +47,13 @@ jobs:
           npm run lint
 
       - name: Build static site
-        # NODE_ENV=production triggers the production basePath in
-        # next.config.ts (see `isProd` branch).
+        # NODE_ENV=production enables the production bundle (no basePath
+        # since the site is served from the custom-domain apex). Inject
+        # the production URL so metadataBase resolves to the real domain
+        # instead of falling back to localhost.
         env:
           NODE_ENV: production
+          NEXT_PUBLIC_SITE_URL: https://www.song52wow.xyz
         run: npm run build
 
       - name: Upload Pages artifact
@@ -65,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: https://song52wow.github.io/portfolio/
+      url: https://www.song52wow.xyz/
     steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4

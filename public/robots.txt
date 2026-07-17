@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://song52wow.github.io/portfolio/sitemap.xml
+Sitemap: https://www.song52wow.xyz/sitemap.xml
