@@ -35,7 +35,7 @@ export const works: Work[] = [
   {
     id: "1",
     slug: "cuporacle",
-    title: "CupOracle",
+    title: "世界杯 AI 预测展示平台",
     description:
       "面向 2026 世界杯正赛的 AI 胜率预测仪表盘，多模型并行推理，部署在 Cloudflare 全栈生态。",
     highlights: [
@@ -54,7 +54,7 @@ export const works: Work[] = [
   {
     id: "2",
     slug: "pump",
-    title: "Pump",
+    title: "去中心化代币启动平台",
     description:
       "基于 Base 网络的去中心化代币启动平台，文化币 / Meme 币无许可发行与交易，PC + 钱包内 DApp 双端访问。",
     highlights: [
@@ -73,7 +73,7 @@ export const works: Work[] = [
   {
     id: "3",
     slug: "extension-purse",
-    title: "Extension Purse",
+    title: "浏览器插件(社交推文 AI 标注)",
     description:
       "面向 AI 训练数据生产的浏览器扩展，把推文标注、XP 积分激励、Web3 钱包奖励串成「标注→积分→链上奖励」众包闭环。",
     highlights: [
@@ -92,7 +92,7 @@ export const works: Work[] = [
   {
     id: "4",
     slug: "baabaabet",
-    title: "BaaBaaBet",
+    title: "社交预测平台",
     description:
       "覆盖赛事大厅、盘口下单、链上交易、CreateEvent、Membership NFT 的 Web3 链上预测 DApp，多链并行 + 多钱包接入。",
     highlights: [
