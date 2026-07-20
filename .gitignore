@@ -58,4 +58,5 @@ next-env.d.ts
 # iteration / debugging screenshots in docs/screenshots/ — never tracked
 /docs/screenshots/*
 # tracked screenshots live under docs/screenshots/** (carousel/, resume/, references/, …)
+!/docs/screenshots/**/
 /.workbuddy/
