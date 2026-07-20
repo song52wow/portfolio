@@ -86,12 +86,9 @@ export function SiteHeaderFallback({
 
           {/* Right cluster — same shape and size as the live header so
               the layout doesn't shift when hydration swaps in the
-              real SiteHeader. Buttons are inert placeholders. */}
+              real SiteHeader. The Menu pill mirrors its mobile-only
+              visibility. */}
           <div className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-[var(--paper-on-night)]/40"
-            />
             <span
               aria-hidden
               className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-[12px] text-[var(--paper-on-night)]/40"
@@ -100,14 +97,10 @@ export function SiteHeaderFallback({
             </span>
             <span
               aria-hidden
-              className="inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-[12px] text-[var(--paper-on-night)]/40"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-[12px] text-[var(--paper-on-night)]/40 sm:hidden"
             >
               Menu
             </span>
-            <span
-              aria-hidden
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-[var(--paper-on-night)]/40"
-            />
           </div>
         </div>
       </div>

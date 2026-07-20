@@ -98,15 +98,8 @@ export function SiteHeader() {
             </div>
           </nav>
 
-          {/* Right cluster — search + lang switcher + menu + apps */}
+          {/* Right cluster — lang switcher (desktop) + mobile-only menu */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label={dict.header.searchAria}
-              className="focus-ring circle-btn"
-            >
-              <SearchIcon />
-            </button>
             <Suspense fallback={<LanguageSwitcherFallback ariaLabel={dict.header.langSwitchAria} />}>
               <LanguageSwitcher
                 current={locale}
@@ -115,6 +108,7 @@ export function SiteHeader() {
                 ariaLabel={dict.header.langSwitchAria}
               />
             </Suspense>
+            {/* Mobile-only menu — desktop shows the centered nav instead. */}
             <button
               type="button"
               onClick={() => setMenuOpen((o) => !o)}
@@ -123,27 +117,25 @@ export function SiteHeader() {
               aria-label={
                 menuOpen ? dict.header.menuCloseAria : dict.header.menuOpenAria
               }
-              className="focus-ring glass-pill inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-[12px] text-[var(--paper-on-night)] transition-colors duration-150 hover:bg-white/10"
+              className="focus-ring glass-pill inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-[12px] text-[var(--paper-on-night)] transition-colors duration-150 hover:bg-white/10 sm:hidden"
             >
               <MenuGlyph open={menuOpen} />
               <span className="catalog-num">
                 {menuOpen ? dict.header.menuCloseLabel : dict.header.menuOpenLabel}
               </span>
             </button>
-            <button
-              type="button"
-              aria-label={dict.header.appsAria}
-              className="focus-ring circle-btn"
-            >
-              <AppsIcon />
-            </button>
           </div>
         </div>
 
-        {/* Mobile dropdown — mirrors the desktop nav, only on < sm */}
+        {/* Mobile dropdown — mirrors the desktop nav, only on < sm.
+           * z-50 sits above the header (z-40) and the hero (z-10), and
+           * `backdrop-blur-md` re-applies the glass blur here directly
+           * — the matching rule on .glass-pill is dropped by Tailwind's
+           * CSS optimizer, so without this utility the centerpiece text
+           * bleeds through the pill. */}
         <div
           id="mobile-menu"
-          className={`glass-pill pointer-events-auto absolute inset-x-0 top-[60px] mx-1 origin-top overflow-hidden rounded-2xl transition-all duration-200 ease-out sm:hidden ${
+          className={`glass-pill pointer-events-auto absolute inset-x-0 top-[60px] z-50 mx-1 origin-top overflow-hidden rounded-2xl backdrop-blur-md transition-all duration-200 ease-out sm:hidden ${
             menuOpen
               ? "visible max-h-80 opacity-100"
               : "invisible max-h-0 opacity-0"
@@ -271,46 +263,6 @@ function MenuGlyph({ open }: { open: boolean }) {
           <path d="M3 18h18" />
         </>
       )}
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
-}
-
-function AppsIcon() {
-  return (
-    <svg
-      width="16"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <circle cx="5" cy="5" r="1.6" />
-      <circle cx="12" cy="5" r="1.6" />
-      <circle cx="19" cy="5" r="1.6" />
-      <circle cx="5" cy="12" r="1.6" />
-      <circle cx="12" cy="12" r="1.6" />
-      <circle cx="19" cy="12" r="1.6" />
-      <circle cx="5" cy="19" r="1.6" />
-      <circle cx="12" cy="19" r="1.6" />
-      <circle cx="19" cy="19" r="1.6" />
     </svg>
   );
 }

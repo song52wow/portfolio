@@ -13,10 +13,8 @@
   "header": {
     "homeAria": "回到首页",
     "navAria": "主导航",
-    "searchAria": "搜索作品",
     "menuOpenAria": "打开菜单",
     "menuCloseAria": "关闭菜单",
-    "appsAria": "应用视图",
     "menuOpenLabel": "Menu",
     "menuCloseLabel": "Close",
     "langSwitchAria": "切换语言"

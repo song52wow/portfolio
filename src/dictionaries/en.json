@@ -13,10 +13,8 @@
   "header": {
     "homeAria": "Go to home",
     "navAria": "Main navigation",
-    "searchAria": "Search works",
     "menuOpenAria": "Open menu",
     "menuCloseAria": "Close menu",
-    "appsAria": "App view",
     "menuOpenLabel": "Menu",
     "menuCloseLabel": "Close",
     "langSwitchAria": "Switch language"
