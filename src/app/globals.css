@@ -38,8 +38,8 @@
   --color-ink-soft:       var(--dawn);
 
   /* Font families injected by next/font in layout.tsx */
-  --font-display: var(--font-bricolage);
-  --font-body:    var(--font-manrope);
+  --font-display: var(--font-baloo2);
+  --font-body:    var(--font-baloo2);
   --font-mono:    var(--font-jetbrains);
   --font-cjk:     var(--font-noto);
 
@@ -87,8 +87,8 @@ body {
 
 /* Display headline — used on centerpiece */
 .display-headline {
-  font-family: var(--font-display), serif;
-  letter-spacing: -0.04em;
+  font-family: var(--font-display), cursive;
+  letter-spacing: -0.02em;
   line-height: 0.92;
   font-weight: 700;
 }
