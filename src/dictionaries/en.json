@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "siteName": "EXHIBITION WORKS / 作品集",
+    "siteDescription": "An index of moving-image works. · 个人影像作品索引。",
+    "ogLocale": "en_US"
+  },
+  "nav": {
+    "works": "Works",
+    "about": "About",
+    "resume": "Resume",
+    "contact": "Contact"
+  },
+  "header": {
+    "homeAria": "Go to home",
+    "navAria": "Main navigation",
+    "searchAria": "Search works",
+    "menuOpenAria": "Open menu",
+    "menuCloseAria": "Close menu",
+    "appsAria": "App view",
+    "menuOpenLabel": "Menu",
+    "menuCloseLabel": "Close",
+    "langSwitchAria": "Switch language"
+  },
+  "preloader": {
+    "brand": "Exhibition Works",
+    "loadingFilms": "Loading films"
+  },
+  "carousel": {
+    "scrollHint": "Scroll to discover",
+    "explore": "Explore",
+    "visitSite": "Visit Site",
+    "techHighlights": "Tech Highlights",
+    "techTags": "Tech tags",
+    "playBg": "Play background video",
+    "pauseBg": "Pause background video",
+    "openOverlay": "Play fullscreen",
+    "closeVideo": "Close video",
+    "unsupportedVideo": "Your device can't play this video.<br/>Please try another browser or desktop.",
+    "unsupportedHeadline": "Unsupported video format",
+    "timeline": "Works timeline",
+    "thumbStack": "Works index",
+    "currentWork": "Current work",
+    "noWorks": "No works yet",
+    "loading": "Loading…",
+    "jumpTo": "Jump to {title}",
+    "switchTo": "Switch to {title}",
+    "viewWork": "View {title}",
+    "externalWork": "Open {title} external link",
+    "highlightsRegion": "{title} tech highlights",
+    "backdropFor": "{title} background video",
+    "overlayTitle": "{title} video"
+  },
+  "resume": {
+    "title": "Resume · EXHIBITION WORKS",
+    "description": "Resume · An index of moving-image works.",
+    "sectionResume": "RESUME · 简历",
+    "sectionSummary": "Summary",
+    "sectionExperience": "Experience",
+    "sectionWorks": "Selected Works · 作品",
+    "sectionSkills": "Skills",
+    "sectionContact": "Contact",
+    "contactEmail": "EMAIL",
+    "contactGithub": "GITHUB",
+    "contactSite": "SITE"
+  },
+  "works": {
+    "cuporacle": {
+      "title": "CupOracle — AI World Cup Prediction",
+      "description": "An AI win-probability dashboard for the 2026 FIFA World Cup. Parallel multi-model inference on the Cloudflare full-stack.",
+      "highlights": [
+        "Next.js 14 App Router + RSC + Edge Runtime, rewrites proxy to kill cross-origin issues",
+        "Cloudflare Workers (Hono) + D1 backend, Mock fallback for cold-start dev experience",
+        "OpenAI-compatible parallel multi-model: DeepSeek / GLM / MiMo / others",
+        "LLM_PREDICTION_MODELS env var to swap prediction engines on the fly"
+      ]
+    },
+    "pump": {
+      "title": "Decentralized Token Launchpad",
+      "description": "A Base-network launchpad for permissionless cultural / meme coin issuance and trading, served on both desktop and in-wallet DApp.",
+      "highlights": [
+        "Five core routes: CreateToken / TradingToken / MyDataToken / Exit / Discover",
+        "Farcaster MiniApp SDK auto-switches desktop ↔ in-wallet DApp",
+        "TradingView custom feeds + live WebSocket orderbook + ECharts dual engine",
+        "ethers v5 + viem + viem/Privy dual-stack contract calls",
+        "TypeChain + GenAPI auto-generate typed contracts and HTTP clients",
+        "UI mixed: Element Plus + Naive UI + Reka UI + UnoCSS + GSAP"
+      ]
+    },
+    "extension-purse": {
+      "title": "Browser Extension (Social Tweet AI Annotation)",
+      "description": "A browser extension for AI training-data production, chaining tweet annotation, XP incentives, and Web3 wallet rewards into a 'annotate → score → on-chain reward' crowd loop.",
+      "highlights": [
+        "Content script injects annotation panel into X / Twitter tweets: sentiment / topic / NER",
+        "XP tiered incentives: basic 5 / standard 10 / expert 50, per-tweet +10, cap +500",
+        "mark.js + GSAP for text highlight and motion, live TaskList / XpLevel progress",
+        "Popup integrates 2FA login, wallet connect, withdraw history view",
+        "pnpm + Turbo monorepo, three sides (content / background / popup) share abstractions"
+      ]
+    },
+    "baabaabet": {
+      "title": "Social Prediction DApp",
+      "description": "A Web3 on-chain prediction DApp covering event lobby, order placement, on-chain trading, CreateEvent, and Membership NFT, with multi-chain and multi-wallet support.",
+      "highlights": [
+        "Vite (main) + Vue CLI 5 (sub) sharing a common workspace for multi-chain parallelism",
+        "In-house abi-types-generator produces typed contract clients from multiple ABIs",
+        "ethers v5 + WalletConnect v1 + MetaMask unified wallet access",
+        "PIXI.js v7 slot animations / GSAP Business + Lottie motion / ECharts + Highcharts"
+      ]
+    }
+  }
+}

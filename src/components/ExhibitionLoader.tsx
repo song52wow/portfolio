@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { WorkIndex } from "./WorkIndex";
 import { PreloaderScreen } from "./PreloaderScreen";
 import { preloadVideos } from "@/lib/preloadVideos";
 import { works } from "@/data/works";
+import { useI18n } from "@/lib/I18nContext";
 
 type Phase = "loading" | "revealing" | "done";
 
@@ -13,6 +14,7 @@ type Phase = "loading" | "revealing" | "done";
 const SAFETY_TIMEOUT_MS = 45_000;
 
 export function ExhibitionLoader() {
+  const { dict } = useI18n();
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<Phase>("loading");
   const [urls, setUrls] = useState<Record<string, string>>({});
@@ -68,13 +70,26 @@ export function ExhibitionLoader() {
   return (
     <>
       {(phase === "loading" || phase === "revealing") && (
-        <PreloaderScreen progress={progress} fading={phase === "revealing"} />
+        <PreloaderScreen
+          progress={progress}
+          fading={phase === "revealing"}
+          brand={dict.preloader.brand}
+          loadingFilms={dict.preloader.loadingFilms}
+        />
       )}
       <div
         className={phase === "loading" ? "opacity-0" : "opacity-100"}
         style={{ transition: "opacity 600ms ease" }}
       >
-        <WorkIndex videoObjectUrls={urls} />
+        {/* WorkIndex calls useSearchParams() to read ?w=<slug>; static
+         * export prerender requires a Suspense boundary at this level
+         * so the carousel can hydrate on the client. The fallback is
+         * null because the PreloaderScreen above already covers the
+         * viewport during loading — there's nothing visible for the
+         * fallback to show. */}
+        <Suspense fallback={null}>
+          <WorkIndex videoObjectUrls={urls} />
+        </Suspense>
       </div>
     </>
   );

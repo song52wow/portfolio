@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "siteName": "作品集 / EXHIBITION WORKS",
+    "siteDescription": "个人影像作品索引 · Index of moving-image works.",
+    "ogLocale": "zh_CN"
+  },
+  "nav": {
+    "works": "作品",
+    "about": "关于",
+    "resume": "简历",
+    "contact": "联系"
+  },
+  "header": {
+    "homeAria": "回到首页",
+    "navAria": "主导航",
+    "searchAria": "搜索作品",
+    "menuOpenAria": "打开菜单",
+    "menuCloseAria": "关闭菜单",
+    "appsAria": "应用视图",
+    "menuOpenLabel": "Menu",
+    "menuCloseLabel": "Close",
+    "langSwitchAria": "切换语言"
+  },
+  "preloader": {
+    "brand": "Exhibition Works",
+    "loadingFilms": "Loading films"
+  },
+  "carousel": {
+    "scrollHint": "滚动发现下一个作品",
+    "explore": "Explore",
+    "visitSite": "Visit Site",
+    "techHighlights": "Tech Highlights",
+    "techTags": "技术标签",
+    "playBg": "播放背景视频",
+    "pauseBg": "暂停背景视频",
+    "openOverlay": "全屏播放视频",
+    "closeVideo": "关闭视频",
+    "unsupportedVideo": "当前设备暂不支持播放该视频。<br/>请使用其他浏览器或桌面端观看。",
+    "unsupportedHeadline": "不支持的视频格式",
+    "timeline": "作品时间线",
+    "thumbStack": "作品目录",
+    "currentWork": "当前作品",
+    "noWorks": "暂无作品",
+    "loading": "加载中…",
+    "jumpTo": "跳到 {title}",
+    "switchTo": "切换到 {title}",
+    "viewWork": "查看 {title}",
+    "externalWork": "打开 {title} 外部链接",
+    "highlightsRegion": "{title} 技术亮点",
+    "backdropFor": "{title} 背景视频",
+    "overlayTitle": "{title} 视频"
+  },
+  "resume": {
+    "title": "Resume · 作品集",
+    "description": "简历 · 个人影像作品集。",
+    "sectionResume": "RESUME · 简历",
+    "sectionSummary": "概要",
+    "sectionExperience": "工作经历",
+    "sectionWorks": "作品 · Selected Works",
+    "sectionSkills": "技能",
+    "sectionContact": "联系方式",
+    "contactEmail": "EMAIL",
+    "contactGithub": "GITHUB",
+    "contactSite": "SITE"
+  },
+  "works": {
+    "cuporacle": {
+      "title": "世界杯 AI 预测展示平台",
+      "description": "面向 2026 世界杯正赛的 AI 胜率预测仪表盘,多模型并行推理,部署在 Cloudflare 全栈生态。",
+      "highlights": [
+        "Next.js 14 App Router + RSC + Edge Runtime,rewrites 代理消除跨域",
+        "Cloudflare Workers (Hono) + D1 后端架构,Mock fallback 保障冷启动开发体验",
+        "OpenAI 兼容多模型并行:DeepSeek / GLM / MiMo / 其他",
+        "LLM_PREDICTION_MODELS 环境变量灵活切换预测引擎"
+      ]
+    },
+    "pump": {
+      "title": "去中心化代币启动平台",
+      "description": "基于 Base 网络的去中心化代币启动平台,文化币 / Meme 币无许可发行与交易,PC + 钱包内 DApp 双端访问。",
+      "highlights": [
+        "五大核心路由:CreateToken / TradingToken / MyDataToken / Exit / 发现",
+        "Farcaster MiniApp SDK 自动切换 PC 端 ↔ 钱包内 DApp",
+        "TradingView 自定义 + 实时 WebSocket 行情 + ECharts 双引擎",
+        "ethers v5 + viem + viem/Privy 双栈合约调用",
+        "TypeChain + GenAPI 自动生成类型化合约与 HTTP 客户端",
+        "UI 混合 Element Plus + Naive UI + Reka UI + UnoCSS + GSAP"
+      ]
+    },
+    "extension-purse": {
+      "title": "浏览器插件(社交推文 AI 标注)",
+      "description": "面向 AI 训练数据生产的浏览器扩展,把推文标注、XP 积分激励、Web3 钱包奖励串成「标注→积分→链上奖励」众包闭环。",
+      "highlights": [
+        "content 端向 X / Twitter 推文注入标注面板:情感 / 主题 / NER 三类打标",
+        "XP 分级激励:basic 5 / standard 10 / expert 50,单推文 +10、上限 +500",
+        "mark.js + GSAP 完成文本高亮与动效,TaskList / XpLevel 实时进度条",
+        "popup 端集成 2FA 安全登录、钱包连接与提现记录视图",
+        "pnpm + Turbo monorepo,三端 (content / background / popup) 共享抽象"
+      ]
+    },
+    "baabaabet": {
+      "title": "社交预测平台",
+      "description": "覆盖赛事大厅、盘口下单、链上交易、CreateEvent、Membership NFT 的 Web3 链上预测 DApp,多链并行 + 多钱包接入。",
+      "highlights": [
+        "Vite (主链) + Vue CLI 5 (子链) 共用 common workspace 多链并行架构",
+        "自研 abi-types-generator 一键生成多份合约 TS 类型客户端",
+        "ethers v5 + WalletConnect v1 + MetaMask 多钱包统一接入",
+        "PIXI.js v7 老虎机 / GSAP Business + Lottie 动效 / ECharts + Highcharts"
+      ]
+    }
+  }
+}

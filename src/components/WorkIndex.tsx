@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -9,8 +9,11 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { works, type Work } from "@/data/works";
+import { useI18n } from "@/lib/I18nContext";
+import { getWorkTranslation, localeBasePath } from "@/lib/i18n";
 
 const AUTOPLAY_MS = 8000;
 const CROSSFADE_MS = 600;
@@ -24,41 +27,11 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
  * back. Currently hidden per request. */
 const SHOW_THUMBNAILS = false;
 
-/* Detect mobile viewport (Tailwind `sm` breakpoint = 640px). Routes the
- * play button to an overlay player on small screens instead of the
- * in-place cinematic background video. */
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return isMobile;
-}
-
-/* Build the <source> list for a work. The H.264 MP4 is preferred (plays
- * on iOS / Android / desktop Chrome); the original .mov is kept as a
- * Safari/legacy fallback. Order matters — browsers pick the first they
- * can play. */
-function buildVideoSources(
-  work: Work,
-  objectUrls?: Record<string, string>,
-): { src: string; type: string }[] {
-  // Prefer the in-memory copy produced by the preloader so we never
-  // download a video twice.
-  const preloaded = objectUrls?.[work.slug];
-  if (preloaded) {
-    const isMp4 = (work.videoMp4Src ?? work.videoSrc).endsWith(".mp4");
-    return [{ src: preloaded, type: isMp4 ? "video/mp4" : "video/quicktime" }];
-  }
-  const list: { src: string; type: string }[] = [];
-  if (work.videoMp4Src) list.push({ src: work.videoMp4Src, type: "video/mp4" });
-  list.push({ src: work.videoSrc, type: "video/quicktime" });
-  return list;
-}
+/* Compute the base path for the current locale. Used to prefix
+ * carousel focus URLs (?w=<slug>) and any other in-app links, so a
+ * focus jump on /en/ stays on /en/ rather than dropping the user
+ * back to the default-locale home. The helper lives in
+ * `@/lib/i18n` so both this file and the server pages can share it. */
 
 /* ----------------------------------------------------------------
  * HeroBackdrop — full-viewport background for the ACTIVE work.
@@ -71,10 +44,12 @@ function HeroBackdrop({
   work,
   isPlaying,
   objectUrls,
+  backdropAria,
 }: {
   work: Work;
   isPlaying: boolean;
   objectUrls?: Record<string, string>;
+  backdropAria: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -134,7 +109,7 @@ function HeroBackdrop({
           opacity: isPlaying ? 1 : 0,
           transition: `opacity ${CROSSFADE_MS}ms ease`,
         }}
-        aria-label={`${work.title} 背景视频`}
+        aria-label={backdropAria}
       >
         {buildVideoSources(work, objectUrls).map((s) => (
           <source key={s.type} src={s.src} type={s.type} />
@@ -168,15 +143,38 @@ export function WorkIndex({
 }: {
   videoObjectUrls?: Record<string, string>;
 }) {
+  const { locale, dict } = useI18n();
+  const basePath = localeBasePath(locale);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
+  /* `useSearchParams()` from next/navigation forces a Suspense
+   * bailout during static export prerender (the hook has no request
+   * context to read at build time). To keep the carousel fully
+   * server-rendered, we read `?w=<slug>` via `useSyncExternalStore`
+   * subscribed to the window's popstate / history events.
+   *
+   * - SSR snapshot returns "" (no query), so the server renders the
+   *   first work — same as if the URL had no `?w=` parameter.
+   * - On the client the snapshot reads `window.location.search`,
+   *   triggering a re-render that jumps to the URL-specified work.
+   * - subscribe() wires popstate + a custom history event so client
+   *   navigations within the SPA update the carousel index without
+   *   needing router events.
+   *
+   * This keeps the SSR/CSR boundary clean (no setState-in-effect
+   * lint warning, no hydration mismatch) while still honoring deep
+   * links to specific works. */
+  const searchString = useSyncExternalStore(
+    subscribeToLocation,
+    getLocationSearch,
+    getServerSearchSnapshot,
+  );
   const initialIndex = useMemo(() => {
-    const slug = searchParams.get("w");
+    const slug = new URLSearchParams(searchString).get("w");
     if (!slug) return 0;
     const idx = works.findIndex((w) => w.slug === slug);
     return idx >= 0 ? idx : 0;
-  }, [searchParams]);
+  }, [searchString]);
 
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [isPaused, setIsPaused] = useState(false);
@@ -185,20 +183,34 @@ export function WorkIndex({
 
   const isMobile = useIsMobile();
 
-  /* Keep route param in sync with active carousel index. */
+  /* Keep route param in sync with active carousel index. After
+   * router.push updates window.location, dispatch a custom event so
+   * the location store (used to read ?w= via useSyncExternalStore)
+   * re-reads the URL. router.push returns void (the URL change is
+   * synchronous in the App Router), so we defer the dispatch one
+   * microtask to ensure window.location reflects the new URL. */
+  const dispatchLocationChange = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("exhibition:location-change"));
+    }
+  }, []);
+
   const pushFocus = useCallback(
     (idx: number) => {
       const work = works[idx];
       if (!work) return;
-      const url = idx === 0 ? "/" : `/?w=${work.slug}`;
+      const url =
+        idx === 0 ? `${basePath}/` : `${basePath}/?w=${work.slug}`;
       router.push(url, { scroll: false });
+      queueMicrotask(dispatchLocationChange);
     },
-    [router],
+    [router, basePath, dispatchLocationChange],
   );
 
   const clearFocus = useCallback(() => {
-    router.push("/", { scroll: false });
-  }, [router]);
+    router.push(`${basePath}/`, { scroll: false });
+    queueMicrotask(dispatchLocationChange);
+  }, [router, basePath, dispatchLocationChange]);
 
   const goTo = useCallback(
     (idx: number) => {
@@ -251,11 +263,11 @@ export function WorkIndex({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") goTo(activeIndex + 1);
       else if (e.key === "ArrowLeft") goTo(activeIndex - 1);
-      else if (e.key === "Escape" && searchParams.get("w")) clearFocus();
+      else if (e.key === "Escape" && activeIndex !== 0) clearFocus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex, goTo, searchParams, clearFocus]);
+  }, [activeIndex, goTo, clearFocus]);
 
   /* Scroll to discover — wheel & touch gestures advance the carousel,
      so "Scroll to discover" literally scrolls to the next work (matching
@@ -299,7 +311,7 @@ export function WorkIndex({
     return (
       <main className="grid min-h-dvh place-items-center px-8 text-center">
         <p className="catalog-num text-[12px] text-[var(--mute-on-night)]">
-          No works yet
+          {dict.carousel.noWorks}
         </p>
       </main>
     );
@@ -307,6 +319,16 @@ export function WorkIndex({
 
   const current = works[activeIndex];
   const total = works.length;
+  /* Localized text for the active work — looked up via slug against the
+   * dictionary so the carousel stays in sync with whatever the server
+   * page resolved for the current locale. Falls back to the (single-
+   * language) data title so a missing translation never blanks the UI. */
+  const currentI18n = getWorkTranslation(dict, current.slug);
+  const currentTitle = currentI18n?.title ?? current.title;
+  const currentDescription =
+    currentI18n?.description ?? current.description;
+  const currentHighlights =
+    currentI18n?.highlights ?? current.highlights ?? [];
 
   return (
     <main
@@ -316,7 +338,12 @@ export function WorkIndex({
     >
       {/* Hero backdrop — current work's static image, or its video
           when playing. */}
-      <HeroBackdrop work={current} isPlaying={isPlaying} objectUrls={videoObjectUrls} />
+      <HeroBackdrop
+        work={current}
+        isPlaying={isPlaying}
+        objectUrls={videoObjectUrls}
+        backdropAria={dict.carousel.backdropFor.replace("{title}", currentTitle)}
+      />
 
       {/* Play / pause the background video */}
       <PlayControl
@@ -324,6 +351,9 @@ export function WorkIndex({
         isPlaying={isPlaying}
         onToggleBackground={() => setIsPlaying((p) => !p)}
         onOpenOverlay={() => setVideoOverlayOpen(true)}
+        playLabel={dict.carousel.playBg}
+        pauseLabel={dict.carousel.pauseBg}
+        openLabel={dict.carousel.openOverlay}
       />
 
       <VerticalTimeline
@@ -333,16 +363,30 @@ export function WorkIndex({
           goTo(i);
         }}
         works={works}
+        timelineLabel={dict.carousel.timeline}
+        jumpToTemplate={(title) =>
+          dict.carousel.jumpTo.replace("{title}", title)
+        }
       />
 
       {/* Scroll to discover — paired with the left timeline navigation */}
-      <ScrollHint onNext={() => { setIsPaused(true); goTo(activeIndex + 1); }} />
+      <ScrollHint
+        onNext={() => {
+          setIsPaused(true);
+          goTo(activeIndex + 1);
+        }}
+        label={dict.carousel.scrollHint}
+      />
 
       <Centerpiece
         work={current}
+        title={currentTitle}
+        description={currentDescription}
+        highlights={currentHighlights}
         index={activeIndex}
         total={total}
-        onOpen={() => router.push(`/?w=${current.slug}`, { scroll: false })}
+        onOpen={() => router.push(`${basePath}/?w=${current.slug}`, { scroll: false })}
+        carouselDict={dict.carousel}
       />
 
       {SHOW_THUMBNAILS && (
@@ -354,6 +398,11 @@ export function WorkIndex({
             const i = works.findIndex((x) => x.slug === w.slug);
             if (i >= 0) goTo(i);
           }}
+          stackLabel={dict.carousel.thumbStack}
+          switchToTemplate={(title) =>
+            dict.carousel.switchTo.replace("{title}", title)
+          }
+          getTitle={(slug) => getWorkTranslation(dict, slug)?.title ?? slug}
         />
       )}
 
@@ -361,13 +410,90 @@ export function WorkIndex({
       {videoOverlayOpen && (
         <VideoOverlay
           work={current}
+          title={currentTitle}
           onClose={() => setVideoOverlayOpen(false)}
           objectUrls={videoObjectUrls}
+          closeLabel={dict.carousel.closeVideo}
+          unsupportedHTML={dict.carousel.unsupportedVideo}
+          overlayTitleTemplate={(title) =>
+            dict.carousel.overlayTitle.replace("{title}", title)
+          }
         />
       )}
-
     </main>
   );
+}
+
+/* Detect mobile viewport (Tailwind `sm` breakpoint = 640px). Routes the
+ * play button to an overlay player on small screens instead of the
+ * in-place cinematic background video. Starts false on the server and
+ * after the first effect tick on the client to avoid hydration
+ * mismatches — the first paint always shows desktop-mode controls,
+ * then the hook flips if the actual viewport is < sm. */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return isMobile;
+}
+
+/* ----------------------------------------------------------------
+ * External store: window.location.search, subscribed via
+ * useSyncExternalStore. Lets the carousel track ?w=<slug> without
+ * triggering a Suspense bailout (which useSearchParams would).
+ *
+ *   - SSR snapshot: returns "" — matches the no-?w URL the build
+ *     produces for `/` and `/en/`.
+ *   - CSR snapshot: returns window.location.search.
+ *   - subscribe: fires on popstate AND after next.js soft navigations
+ *     (we dispatch a custom event from pushFocus to keep the store
+ *     in sync after router.push). next/link's prefetched
+ *     navigations update window.location before popstate fires, but
+ *     a microtask-deferred read covers any ordering edge case.
+ * ---------------------------------------------------------------- */
+function getServerSearchSnapshot(): string {
+  return "";
+}
+
+function getLocationSearch(): string {
+  return window.location.search;
+}
+
+function subscribeToLocation(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => onChange();
+  window.addEventListener("popstate", handler);
+  window.addEventListener("exhibition:location-change", handler);
+  return () => {
+    window.removeEventListener("popstate", handler);
+    window.removeEventListener("exhibition:location-change", handler);
+  };
+}
+
+/* Build the <source> list for a work. The H.264 MP4 is preferred (plays
+ * on iOS / Android / desktop Chrome); the original .mov is kept as a
+ * Safari/legacy fallback. Order matters — browsers pick the first they
+ * can play. */
+function buildVideoSources(
+  work: Work,
+  objectUrls?: Record<string, string>,
+): { src: string; type: string }[] {
+  // Prefer the in-memory copy produced by the preloader so we never
+  // download a video twice.
+  const preloaded = objectUrls?.[work.slug];
+  if (preloaded) {
+    const isMp4 = (work.videoMp4Src ?? work.videoSrc).endsWith(".mp4");
+    return [{ src: preloaded, type: isMp4 ? "video/mp4" : "video/quicktime" }];
+  }
+  const list: { src: string; type: string }[] = [];
+  if (work.videoMp4Src) list.push({ src: work.videoMp4Src, type: "video/mp4" });
+  list.push({ src: work.videoSrc, type: "video/quicktime" });
+  return list;
 }
 
 /* ---------------------------------------------------------------- */
@@ -376,19 +502,24 @@ function VerticalTimeline({
   activeIndex,
   onSelect,
   works,
+  timelineLabel,
+  jumpToTemplate,
 }: {
   activeIndex: number;
   onSelect: (i: number) => void;
   works: Work[];
+  timelineLabel: string;
+  jumpToTemplate: (title: string) => string;
 }) {
   // Node centers are placed at (i + 0.5) / N of the container height so that
   // connector lines (positioned at the same fraction + dot radius) line up
   // exactly with each dot. Both elements reference the SAME container, so
   // the line height math (100/N%) stays consistent at every viewport size.
+  const { dict } = useI18n();
   const n = works.length;
   return (
     <aside
-      aria-label="作品时间线"
+      aria-label={timelineLabel}
       className="pointer-events-none absolute inset-y-0 left-0 z-20 flex w-[58px] items-center justify-center"
     >
       <div className="relative h-[68%] w-full">
@@ -415,12 +546,13 @@ function VerticalTimeline({
         {works.map((w, i) => {
           const isActive = i === activeIndex;
           const isPast = i < activeIndex;
+          const title = getWorkTranslation(dict, w.slug)?.title ?? w.title;
           return (
             <button
               key={w.id}
               type="button"
               onClick={() => onSelect(i)}
-              aria-label={`跳到 ${w.title}`}
+              aria-label={jumpToTemplate(title)}
               aria-current={isActive ? "true" : undefined}
               className="focus-ring group pointer-events-auto absolute left-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full"
               style={{
@@ -448,9 +580,9 @@ function VerticalTimeline({
                 aria-hidden
                 className="pointer-events-none absolute left-full top-1/2 ml-3 hidden -translate-y-1/2 max-w-[180px] truncate text-[10px] uppercase tracking-[0.18em] text-[var(--mute-on-night)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:block"
                 style={{ fontFamily: "var(--font-mono)" }}
-                title={w.title}
+                title={title}
               >
-                {w.title}
+                {title}
               </span>
             </button>
           );
@@ -464,33 +596,49 @@ function VerticalTimeline({
 
 function Centerpiece({
   work,
+  title,
+  description,
+  highlights,
   index,
   total,
   onOpen,
+  carouselDict,
 }: {
   work: Work;
+  title: string;
+  description: string;
+  highlights: string[];
   index: number;
   total: number;
   onOpen: () => void;
+  carouselDict: import("@/lib/i18n").Dictionary["carousel"];
 }) {
   /* Hover/click-expand the highlights panel. Two triggers so it works
    * on both pointer (hover) and touch/keyboard (click). `key={work.slug}`
    * on the wrapper below remounts the component per work, which naturally
    * resets this state. */
   const [highlightsOpen, setHighlightsOpen] = useState(false);
-  const hasHighlights = (work.highlights?.length ?? 0) > 0;
+  const hasHighlights = highlights.length > 0;
 
   /* Explore CTA — render as <a target="_blank"> when the work has an
    * externalUrl (e.g. CupOracle's live site), otherwise stay as a
    * button that focuses the carousel route. The same `btn-ember` style
    * works for both, so the visual stays consistent. */
-  const exploreLabel = work.externalUrl ? "Visit Site" : "Explore";
+  const exploreLabel = work.externalUrl
+    ? carouselDict.visitSite
+    : carouselDict.explore;
+  const externalAria = carouselDict.externalWork.replace("{title}", title);
+  const openAria = carouselDict.viewWork.replace("{title}", title);
+  const highlightsListLabel = carouselDict.highlightsRegion.replace(
+    "{title}",
+    title,
+  );
   const ExploreCta = work.externalUrl ? (
     <a
       href={work.externalUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`打开 ${work.title} 外部链接`}
+      aria-label={externalAria}
       className="btn-ember focus-ring"
     >
       <span>{exploreLabel}</span>
@@ -500,7 +648,7 @@ function Centerpiece({
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`查看 ${work.title}`}
+      aria-label={openAria}
       className="btn-ember focus-ring"
     >
       <span>{exploreLabel}</span>
@@ -510,7 +658,7 @@ function Centerpiece({
 
   return (
     <section
-      aria-label="当前作品"
+      aria-label={carouselDict.currentWork}
       className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pb-32 pt-28 right-0 sm:pb-0 sm:pt-24 sm:right-[clamp(0px,30vw,460px)]"
     >
       <div
@@ -539,10 +687,10 @@ function Centerpiece({
            * animation re-fires and the size is re-measured for the new string. */}
         <AutosizeHeadline
           key={work.slug}
-          text={work.title}
+          text={title}
           minSize={36}
           maxSize={104}
-          title={work.title}
+          title={title}
           style={{
             textShadow:
               "0 4px 24px rgba(10,8,20,0.65), 0 16px 60px rgba(10,8,20,0.55)",
@@ -559,7 +707,7 @@ function Centerpiece({
             animation: `hero-rise 800ms 120ms cubic-bezier(.2,.7,.3,1) both`,
           }}
         >
-          {work.description}
+          {description}
         </p>
 
         {/* Tech highlights — hidden by default, expands on hover/focus
@@ -592,16 +740,16 @@ function Centerpiece({
               >
                 ▸
               </span>
-              <span>Tech Highlights</span>
+              <span>{carouselDict.techHighlights}</span>
               <span aria-hidden className="opacity-60">
-                ({work.highlights!.length})
+                ({highlights.length})
               </span>
             </button>
 
             <div
               id={`${work.slug}-hl-list`}
               role="region"
-              aria-label={`${work.title} 技术亮点`}
+              aria-label={highlightsListLabel}
               className="grid transition-[grid-template-rows] duration-300 ease-out"
               style={{
                 gridTemplateRows: highlightsOpen ? "1fr" : "0fr",
@@ -609,7 +757,7 @@ function Centerpiece({
             >
               <ul className="min-h-0 overflow-hidden">
                 <ul className="mt-2.5 space-y-1.5 pb-1 text-[12.5px] leading-snug text-[var(--paper-on-night)]/75 sm:text-[13px]">
-                  {work.highlights!.map((h, i) => (
+                  {highlights.map((h, i) => (
                     <li key={i} className="flex gap-2">
                       <span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--ember)]/80" />
                       <span>{h}</span>
@@ -636,7 +784,7 @@ function Centerpiece({
 
           <div
             className="mt-3.5 flex flex-wrap gap-2"
-            aria-label="技术标签"
+            aria-label={carouselDict.techTags}
           >
             {work.tags?.slice(0, 3).map((t) => (
               <span
@@ -839,10 +987,16 @@ function ThumbnailStack({
   works,
   activeSlug,
   onJump,
+  stackLabel,
+  switchToTemplate,
+  getTitle,
 }: {
   works: Work[];
   activeSlug: string;
   onJump: (work: Work) => void;
+  stackLabel: string;
+  switchToTemplate: (title: string) => string;
+  getTitle: (slug: string) => string;
 }) {
   // Show ALL works (including active) — matches the reference which
   // shows 3 destination tiles regardless of which is in focus. The
@@ -850,7 +1004,7 @@ function ThumbnailStack({
   const visible = works.slice(0, 3);
   return (
     <aside
-      aria-label="作品目录"
+      aria-label={stackLabel}
       className="absolute right-0 top-0 z-10 hidden h-dvh w-[300px] flex-col justify-center gap-4 px-6 py-12 xl:flex 2xl:w-[340px]"
     >
       <div className="flex flex-col gap-4">
@@ -858,10 +1012,12 @@ function ThumbnailStack({
           <ThumbCard
             key={w.id}
             work={w}
+            title={getTitle(w.slug)}
             onJump={() => onJump(w)}
             showArrow={i === 0}
             isActive={w.slug === activeSlug}
             cardIndex={i}
+            switchAria={switchToTemplate(getTitle(w.slug))}
           />
         ))}
       </div>
@@ -871,16 +1027,20 @@ function ThumbnailStack({
 
 function ThumbCard({
   work,
+  title,
   onJump,
   showArrow,
   isActive,
   cardIndex,
+  switchAria,
 }: {
   work: Work;
+  title: string;
   onJump: () => void;
   showArrow: boolean;
   isActive: boolean;
   cardIndex: number;
+  switchAria: string;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
 
@@ -917,7 +1077,7 @@ function ThumbCard({
       onClick={onJump}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      aria-label={`切换到 ${work.title}`}
+      aria-label={switchAria}
       aria-current={isActive ? "true" : undefined}
       className="focus-ring card-3d group relative block w-full overflow-hidden rounded-2xl border text-left"
       style={{
@@ -990,9 +1150,9 @@ function ThumbCard({
           <h3
             className="truncate text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[var(--paper-on-night)]"
             style={{ fontFamily: "var(--font-display)" }}
-            title={work.title}
+            title={title}
           >
-            {work.title}
+            {title}
           </h3>
           <p className="mt-0.5 truncate text-[12px] leading-snug text-[var(--paper-on-night)]/80">
             {taglineFor(work)}
@@ -1045,11 +1205,17 @@ function PlayControl({
   isPlaying,
   onToggleBackground,
   onOpenOverlay,
+  playLabel,
+  pauseLabel,
+  openLabel,
 }: {
   isMobile: boolean;
   isPlaying: boolean;
   onToggleBackground: () => void;
   onOpenOverlay: () => void;
+  playLabel: string;
+  pauseLabel: string;
+  openLabel: string;
 }) {
   // On mobile the button opens a full-screen overlay player (the .mov
   // sources don't play inline on small screens / Android, and an inline
@@ -1064,10 +1230,10 @@ function PlayControl({
       onClick={overlayMode ? onOpenOverlay : onToggleBackground}
       aria-label={
         active
-          ? "暂停背景视频"
+          ? pauseLabel
           : overlayMode
-            ? "全屏播放视频"
-            : "播放背景视频"
+            ? openLabel
+            : playLabel
       }
       aria-pressed={active}
       className="focus-ring group absolute right-4 bottom-6 z-20 flex h-[60px] w-[60px] items-center justify-center rounded-full border border-white/20 bg-white/[0.07] text-[var(--paper-on-night)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/[0.14] sm:right-5 sm:bottom-auto sm:top-1/2 sm:h-[84px] sm:w-[84px] sm:-translate-y-1/2"
@@ -1122,12 +1288,20 @@ function PauseIcon() {
  * ---------------------------------------------------------------- */
 function VideoOverlay({
   work,
+  title,
   onClose,
   objectUrls,
+  closeLabel,
+  unsupportedHTML,
+  overlayTitleTemplate,
 }: {
   work: Work;
+  title: string;
   onClose: () => void;
   objectUrls?: Record<string, string>;
+  closeLabel: string;
+  unsupportedHTML: string;
+  overlayTitleTemplate: (title: string) => string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
@@ -1173,7 +1347,7 @@ function VideoOverlay({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`${work.title} 视频`}
+      aria-label={overlayTitleTemplate(title)}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-sm"
       onClick={onClose}
     >
@@ -1181,7 +1355,7 @@ function VideoOverlay({
       <button
         type="button"
         onClick={onClose}
-        aria-label="关闭视频"
+        aria-label={closeLabel}
         className="focus-ring absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[var(--paper-on-night)] backdrop-blur-md transition-colors hover:bg-white/20"
       >
         <svg
@@ -1214,10 +1388,10 @@ function VideoOverlay({
                 style={{ filter: "brightness(0.7)" }}
               />
             </div>
-            <p className="px-5 py-4 text-center text-[14px] leading-relaxed text-[var(--paper-on-night)]/85">
-              当前设备暂不支持播放该视频。<br />
-              请使用其他浏览器或桌面端观看。
-            </p>
+            <p
+              className="px-5 py-4 text-center text-[14px] leading-relaxed text-[var(--paper-on-night)]/85"
+              dangerouslySetInnerHTML={{ __html: unsupportedHTML }}
+            />
           </div>
         ) : (
           <video
@@ -1247,12 +1421,18 @@ function VideoOverlay({
  * with the left VerticalTimeline: both live in the left column and
  * advance to the next work (scroll / swipe / click).
  * ---------------------------------------------------------------- */
-function ScrollHint({ onNext }: { onNext: () => void }) {
+function ScrollHint({
+  onNext,
+  label,
+}: {
+  onNext: () => void;
+  label: string;
+}) {
   return (
     <button
       type="button"
       onClick={onNext}
-      aria-label="滚动发现下一个作品"
+      aria-label={label}
       className="focus-ring group pointer-events-auto absolute bottom-6 left-6 z-20 flex cursor-pointer items-center gap-3 bg-transparent p-0 sm:bottom-7 sm:left-10"
     >
       <span className="circle-btn inline-flex transition-all duration-200 group-hover:border-white/30 group-hover:bg-white/[0.14] group-hover:text-[var(--paper-on-night)]">
@@ -1272,7 +1452,7 @@ function ScrollHint({ onNext }: { onNext: () => void }) {
         </svg>
       </span>
       <span className="catalog-num hidden text-[10px] text-[var(--mute-on-night)] transition-all duration-200 group-hover:tracking-[0.22em] group-hover:text-[var(--paper-on-night)] sm:inline">
-        Scroll to discover
+        {label}
       </span>
     </button>
   );

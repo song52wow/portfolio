@@ -1,14 +1,7 @@
 import { ImageResponse } from "next/og";
 
-/* Favicon rendered by Next.js's app-router metadata system.
- * Square dark plate + serif "S" + ember accent bar at the bottom —
- * mirrors the in-app SiteHeader monogram while adding a visual mark
- * that survives the 16×16 reduction of a browser tab. */
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
-
-/* Required by `output: 'export'` — the icon route must be statically
- * generated at build time and not treated as a dynamic server route. */
 export const dynamic = "force-static";
 
 export default function Icon() {
@@ -26,7 +19,6 @@ export default function Icon() {
           position: "relative",
         }}
       >
-        {/* Monogram — letterpress cream on night */}
         <div
           style={{
             color: "#f4ecd9",
@@ -39,7 +31,6 @@ export default function Icon() {
         >
           S
         </div>
-        {/* Ember accent bar — echoes the project's --ember color token */}
         <div
           style={{
             position: "absolute",

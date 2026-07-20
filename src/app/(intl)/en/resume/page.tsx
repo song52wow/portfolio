@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteHeaderFallback } from "@/components/SiteHeaderFallback";
 import { works } from "@/data/works";
+import { I18nProvider } from "@/lib/I18nContext";
+import { getDictionary } from "@/lib/dictionaries";
+import { getWorkTranslation, localeBasePath as basePathFor } from "@/lib/i18n";
+
+const dict = await getDictionary("en");
 
 export const metadata: Metadata = {
-  title: "Resume · 作品集",
-  description: "简历 · 个人影像作品集。",
+  title: dict.resume.title,
+  description: dict.resume.description,
 };
 
 type PlaceholderProps = {
@@ -16,7 +23,9 @@ type PlaceholderProps = {
 /**
  * Inline skeleton line — used wherever real content is missing.
  * Renders as a styled placeholder so the page reads as a design preview
- * without making up fabricated experience.
+ * without making up fabricated experience. Placeholder labels stay in
+ * the author's authoring language (Chinese, with English hints in the
+ * zip) — they're not user-facing UI copy.
  */
 function Placeholder({ label, width = "md", italic = true }: PlaceholderProps) {
   const widthMap: Record<NonNullable<PlaceholderProps["width"]>, string> = {
@@ -50,10 +59,14 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function ResumePage() {
+export default function ResumePageEn() {
   return (
-    <>
-      <SiteHeader />
+    <I18nProvider locale="en" dict={dict}>
+      <Suspense
+        fallback={<SiteHeaderFallback dict={dict} localeBasePath={basePathFor("en")} />}
+      >
+        <SiteHeader />
+      </Suspense>
       <main
         className="cinematic cinematic-bg min-h-dvh overflow-x-hidden px-5 pb-24 pt-28 sm:px-0 sm:pt-32 print:max-w-none print:px-6"
         id="about"
@@ -62,7 +75,7 @@ export default function ResumePage() {
           {/* Identity */}
           <header className="border-b border-white/10 pb-10">
             <p className="catalog-num text-[10px] text-[var(--ember)]">
-              RESUME · 简历
+              {dict.resume.sectionResume}
             </p>
             <h1
               className="display-headline mt-4"
@@ -72,29 +85,29 @@ export default function ResumePage() {
                 lineHeight: 0.95,
               }}
             >
-              <Placeholder label="姓名 / Name" width="lg" />
+              <Placeholder label="Name / 姓名" width="lg" />
             </h1>
             <p className="mt-5 text-[15px] leading-relaxed text-[var(--mute-on-night)]">
-              <Placeholder label="职位标题 / 一句话立场" width="xl" />
+              <Placeholder label="Title / one-line stance" width="xl" />
             </p>
           </header>
 
           {/* Summary */}
           <section>
-            <SectionHeading>概要</SectionHeading>
+            <SectionHeading>{dict.resume.sectionSummary}</SectionHeading>
             <div className="space-y-2 pt-4 text-[14px] leading-relaxed text-[var(--paper-on-night)]">
               <p>
-                <Placeholder label="一段话自我介绍,2-3 行,描述工作范畴" width="xl" />
+                <Placeholder label="2-3 line self-intro describing your work" width="xl" />
               </p>
               <p>
-                <Placeholder label="第二句:目前感兴趣的方向" width="lg" />
+                <Placeholder label="Second sentence: current interests" width="lg" />
               </p>
             </div>
           </section>
 
           {/* Experience */}
           <section>
-            <SectionHeading>工作经历</SectionHeading>
+            <SectionHeading>{dict.resume.sectionExperience}</SectionHeading>
             <ol className="mt-4 space-y-7">
               <li>
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4">
@@ -102,7 +115,7 @@ export default function ResumePage() {
                     className="text-[20px] font-semibold tracking-[-0.02em] text-[var(--paper-on-night)]"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
-                    <Placeholder label="公司 / 角色" width="lg" />
+                    <Placeholder label="Company / Role" width="lg" />
                   </h3>
                   <span className="catalog-num text-[10px] text-[var(--mute-on-night)]">
                     <Placeholder label="2026 — Present" width="sm" italic={false} />
@@ -110,10 +123,10 @@ export default function ResumePage() {
                 </div>
                 <ul className="mt-2 list-inside list-disc space-y-1 text-[14px] leading-relaxed text-[var(--paper-on-night)] marker:text-[var(--mute-on-night)]">
                   <li>
-                    <Placeholder label="一段职责 / 成就" width="xl" />
+                    <Placeholder label="Responsibility / achievement" width="xl" />
                   </li>
                   <li>
-                    <Placeholder label="一段职责 / 成就" width="lg" />
+                    <Placeholder label="Responsibility / achievement" width="lg" />
                   </li>
                 </ul>
               </li>
@@ -123,7 +136,7 @@ export default function ResumePage() {
                     className="text-[20px] font-semibold tracking-[-0.02em] text-[var(--paper-on-night)]"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
-                    <Placeholder label="公司 / 角色" width="lg" />
+                    <Placeholder label="Company / Role" width="lg" />
                   </h3>
                   <span className="catalog-num text-[10px] text-[var(--mute-on-night)]">
                     <Placeholder label="2024 — 2026" width="sm" italic={false} />
@@ -131,7 +144,7 @@ export default function ResumePage() {
                 </div>
                 <ul className="mt-2 list-inside list-disc space-y-1 text-[14px] leading-relaxed text-[var(--paper-on-night)] marker:text-[var(--mute-on-night)]">
                   <li>
-                    <Placeholder label="一段职责 / 成就" width="xl" />
+                    <Placeholder label="Responsibility / achievement" width="xl" />
                   </li>
                 </ul>
               </li>
@@ -141,10 +154,10 @@ export default function ResumePage() {
                     className="text-[20px] font-semibold tracking-[-0.02em] text-[var(--paper-on-night)]"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
-                    <Placeholder label="公司 / 角色" width="lg" />
+                    <Placeholder label="Company / Role" width="lg" />
                   </h3>
                   <span className="catalog-num text-[10px] text-[var(--mute-on-night)]">
-                    <Placeholder label="更早期角色" width="sm" italic={false} />
+                    <Placeholder label="Earlier role" width="sm" italic={false} />
                   </span>
                 </div>
               </li>
@@ -153,56 +166,67 @@ export default function ResumePage() {
 
           {/* Selected works — pulls from works.ts so the page stays in sync */}
           <section>
-            <SectionHeading>作品 · Selected Works</SectionHeading>
+            <SectionHeading>{dict.resume.sectionWorks}</SectionHeading>
             <ol className="mt-4 divide-y divide-white/10 border-y border-white/10">
-              {works.map((w) => (
-                <li
-                  key={w.id}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 py-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <span
-                      className="line-clamp-2 text-[16px] font-semibold leading-snug tracking-[-0.02em] text-[var(--paper-on-night)]"
-                      style={{ fontFamily: "var(--font-display)" }}
-                      title={w.title}
-                    >
-                      {w.title}
+              {works.map((w) => {
+                const title = getWorkTranslation(dict, w.slug)?.title ?? w.title;
+                const description =
+                  getWorkTranslation(dict, w.slug)?.description ?? w.description;
+                return (
+                  <li
+                    key={w.id}
+                    className="flex flex-wrap items-baseline justify-between gap-x-4 py-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span
+                        className="line-clamp-2 text-[16px] font-semibold leading-snug tracking-[-0.02em] text-[var(--paper-on-night)]"
+                        style={{ fontFamily: "var(--font-display)" }}
+                        title={title}
+                      >
+                        {title}
+                      </span>
+                      {description && (
+                        <p className="mt-1 line-clamp-1 text-[12px] text-[var(--mute-on-night)]">
+                          {description}
+                        </p>
+                      )}
+                    </div>
+                    <span className="catalog-num text-[10px] text-[var(--mute-on-night)]">
+                      {w.year ?? ""}
                     </span>
-                    {w.description && (
-                      <p className="mt-1 line-clamp-1 text-[12px] text-[var(--mute-on-night)]">
-                        {w.description}
-                      </p>
-                    )}
-                  </div>
-                  <span className="catalog-num text-[10px] text-[var(--mute-on-night)]">
-                    {w.year ?? ""}
-                  </span>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ol>
           </section>
 
           {/* Skills */}
           <section>
-            <SectionHeading>技能</SectionHeading>
+            <SectionHeading>{dict.resume.sectionSkills}</SectionHeading>
             <p className="mt-4 text-[14px] leading-loose text-[var(--paper-on-night)]">
-              <Placeholder label="技能 A · 技能 B · 技能 C" width="xl" />
+              <Placeholder label="Skill A · Skill B · Skill C" width="xl" />
             </p>
           </section>
 
           {/* Contact */}
           <section>
-            <SectionHeading>联系方式</SectionHeading>
+            <SectionHeading>{dict.resume.sectionContact}</SectionHeading>
             <dl className="mt-4 grid grid-cols-[6rem_1fr] gap-y-2 text-[14px]">
-              <dt className="catalog-num text-[10px] text-[var(--mute-on-night)]">EMAIL</dt>
+              <dt className="catalog-num text-[10px] text-[var(--mute-on-night)]">
+                {dict.resume.contactEmail}
+              </dt>
               <dd className="text-[var(--paper-on-night)]">
                 <Placeholder label="name@example.com" width="md" italic={false} />
               </dd>
-              <dt className="catalog-num text-[10px] text-[var(--mute-on-night)]">GITHUB</dt>
+              <dt className="catalog-num text-[10px] text-[var(--mute-on-night)]">
+                {dict.resume.contactGithub}
+              </dt>
               <dd className="text-[var(--paper-on-night)]">
                 <Placeholder label="@username" width="sm" italic={false} />
               </dd>
-              <dt className="catalog-num text-[10px] text-[var(--mute-on-night)]">SITE</dt>
+              <dt className="catalog-num text-[10px] text-[var(--mute-on-night)]">
+                {dict.resume.contactSite}
+              </dt>
               <dd className="text-[var(--paper-on-night)]">
                 <Placeholder label="your-domain.com" width="md" italic={false} />
               </dd>
@@ -211,11 +235,11 @@ export default function ResumePage() {
 
           <footer className="mt-16 border-t border-white/10 pt-4">
             <p className="catalog-num text-[10px] text-[var(--mute-on-night)]">
-              设计稿 · Placeholder content. 编辑此文件即可替换为你自己的内容。
+              Design preview · Placeholder content. Edit this file to replace with your own.
             </p>
           </footer>
         </div>
       </main>
-    </>
+    </I18nProvider>
   );
 }

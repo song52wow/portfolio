@@ -1,13 +1,7 @@
 import { ImageResponse } from "next/og";
 
-/* Apple touch icon — the 180×180 PNG iOS uses for home-screen bookmarks
- * and Safari pinned tabs. Same monogram as /icon.tsx but scaled up:
- * the ember accent bar gets visual weight, the "S" breathes. */
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
-
-/* Required by `output: 'export'` — the apple-icon route must be statically
- * generated at build time. */
 export const dynamic = "force-static";
 
 export default function AppleIcon() {
@@ -37,8 +31,6 @@ export default function AppleIcon() {
         >
           S
         </div>
-        {/* Ember accent — heavier weight than the 32×32 favicon since
-            this canvas can afford the visual real estate. */}
         <div
           style={{
             position: "absolute",

@@ -1,9 +1,13 @@
 export function PreloaderScreen({
   progress,
   fading,
+  brand,
+  loadingFilms,
 }: {
   progress: number;
   fading: boolean;
+  brand: string;
+  loadingFilms: string;
 }) {
   return (
     <div
@@ -15,7 +19,7 @@ export function PreloaderScreen({
     >
       <div className="flex flex-col items-center gap-6">
         <span className="catalog-num text-[11px] uppercase tracking-[0.34em] text-[var(--mute-on-night)]">
-          Exhibition Works
+          {brand}
         </span>
 
         <div className="relative h-px w-[min(58vw,340px)] overflow-hidden bg-white/10">
@@ -36,7 +40,7 @@ export function PreloaderScreen({
             {String(progress).padStart(3, "0")}%
           </span>
           <span className="catalog-num text-[10px] uppercase tracking-[0.22em] text-[var(--mute-on-night)]">
-            Loading films
+            {loadingFilms}
           </span>
         </div>
       </div>
