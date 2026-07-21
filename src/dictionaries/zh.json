@@ -1,6 +1,6 @@
 {
   "meta": {
-    "siteName": "作品集 / EXHIBITION WORKS",
+    "siteName": "Hari — Exhibition Works",
     "siteDescription": "个人影像作品索引 · Index of moving-image works.",
     "ogLocale": "zh_CN"
   },
@@ -49,7 +49,7 @@
     "overlayTitle": "{title} 视频"
   },
   "resume": {
-    "title": "Resume · 作品集",
+    "title": "Hari — Exhibition Works — Resume",
     "description": "简历 · 个人影像作品集。",
     "sectionResume": "RESUME · 简历",
     "sectionSummary": "概要",
