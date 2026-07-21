@@ -259,3 +259,47 @@ body {
   from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
   to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
 }
+
+/* ----------------------------------------------------------------------
+ * Resume spread — stagger fade for each section as it enters view.
+ * Each direct child section is offset, with a max of 6 capped via :nth-child.
+ * -------------------------------------------------------------------- */
+@keyframes resume-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.resume-stagger > section {
+  opacity: 0;
+  animation: resume-rise 700ms cubic-bezier(.2,.7,.3,1) forwards;
+}
+.resume-stagger > section:nth-child(1) { animation-delay: 60ms; }
+.resume-stagger > section:nth-child(2) { animation-delay: 140ms; }
+.resume-stagger > section:nth-child(3) { animation-delay: 220ms; }
+.resume-stagger > section:nth-child(4) { animation-delay: 300ms; }
+.resume-stagger > section:nth-child(5) { animation-delay: 380ms; }
+.resume-stagger > section:nth-child(6) { animation-delay: 460ms; }
+.resume-stagger > section:nth-child(7) { animation-delay: 540ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-stagger > section { animation: none; opacity: 1; }
+}
+
+/* Section heading — ember bar animates from 0 → full width when the
+ * section reaches the start of the spread. Falls back to instant full
+ * width under prefers-reduced-motion. */
+@keyframes ember-bar-grow {
+  from { transform: scaleX(0); transform-origin: left center; }
+  to   { transform: scaleX(1); transform-origin: left center; }
+}
+.section-ember-bar {
+  display: inline-block;
+  animation: ember-bar-grow 720ms cubic-bezier(.2,.7,.3,1) forwards;
+  transform: scaleX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-ember-bar { animation: none; transform: scaleX(1); }
+}
+
+/* Smooth height transition is set inline (style={{ height }}) so we
+ * don't need a keyframe here — element.style.height is updated by
+ * useEffect when the card's `open` state changes. */
