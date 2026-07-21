@@ -345,17 +345,6 @@ export function WorkIndex({
         backdropAria={dict.carousel.backdropFor.replace("{title}", currentTitle)}
       />
 
-      {/* Play / pause the background video */}
-      <PlayControl
-        isMobile={isMobile}
-        isPlaying={isPlaying}
-        onToggleBackground={() => setIsPlaying((p) => !p)}
-        onOpenOverlay={() => setVideoOverlayOpen(true)}
-        playLabel={dict.carousel.playBg}
-        pauseLabel={dict.carousel.pauseBg}
-        openLabel={dict.carousel.openOverlay}
-      />
-
       <VerticalTimeline
         activeIndex={activeIndex}
         onSelect={(i) => {
@@ -385,7 +374,10 @@ export function WorkIndex({
         highlights={currentHighlights}
         index={activeIndex}
         total={total}
-        onOpen={() => router.push(`${basePath}/?w=${current.slug}`, { scroll: false })}
+        isMobile={isMobile}
+        isPlaying={isPlaying}
+        onToggleBackground={() => setIsPlaying((p) => !p)}
+        onOpenOverlay={() => setVideoOverlayOpen(true)}
         carouselDict={dict.carousel}
       />
 
@@ -601,7 +593,10 @@ function Centerpiece({
   highlights,
   index,
   total,
-  onOpen,
+  isMobile,
+  isPlaying,
+  onToggleBackground,
+  onOpenOverlay,
   carouselDict,
 }: {
   work: Work;
@@ -610,7 +605,10 @@ function Centerpiece({
   highlights: string[];
   index: number;
   total: number;
-  onOpen: () => void;
+  isMobile: boolean;
+  isPlaying: boolean;
+  onToggleBackground: () => void;
+  onOpenOverlay: () => void;
   carouselDict: import("@/lib/i18n").Dictionary["carousel"];
 }) {
   /* Hover/click-expand the highlights panel. Two triggers so it works
@@ -620,40 +618,53 @@ function Centerpiece({
   const [highlightsOpen, setHighlightsOpen] = useState(false);
   const hasHighlights = highlights.length > 0;
 
-  /* Explore CTA — render as <a target="_blank"> when the work has an
-   * externalUrl (e.g. CupOracle's live site), otherwise stay as a
-   * button that focuses the carousel route. The same `btn-ember` style
-   * works for both, so the visual stays consistent. */
-  const exploreLabel = work.externalUrl
-    ? carouselDict.visitSite
-    : carouselDict.explore;
+  /* Primary CTA row.
+   *  - Play Video is always present and replaces the previous "Explore"
+   *    button. On desktop it toggles the cinematic background video; on
+   *    mobile it opens the full-screen overlay (the .mov sources don't
+   *    play inline on phones). When the background video is already
+   *    playing on desktop, the same button doubles as Pause so the
+   *    affordance stays accurate without a separate control.
+   *  - Visit Site is only rendered when the work has an externalUrl
+   *    (CupOracle → cuporacle.xyz). It uses the diagonal off-site arrow
+   *    to keep "open in new tab" visually distinct from the play action. */
   const externalAria = carouselDict.externalWork.replace("{title}", title);
-  const openAria = carouselDict.viewWork.replace("{title}", title);
-  const highlightsListLabel = carouselDict.highlightsRegion.replace(
-    "{title}",
-    title,
-  );
-  const ExploreCta = work.externalUrl ? (
+  const playVideoLabel = carouselDict.playVideo;
+  const playActive = !isMobile && isPlaying;
+  const playAria = playActive
+    ? carouselDict.pauseBg
+    : isMobile
+      ? carouselDict.openOverlay
+      : carouselDict.playBg;
+
+  const VisitSiteButton = work.externalUrl ? (
     <a
       href={work.externalUrl}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={externalAria}
-      className="btn-ember focus-ring"
+      className="btn-ember btn-ember--sm focus-ring"
     >
-      <span>{exploreLabel}</span>
-      <ExternalArrowCircle />
+      <span>{carouselDict.visitSite}</span>
+      <ExternalArrowCircle size="sm" />
     </a>
-  ) : (
+  ) : null;
+
+  const PlayVideoButton = (
     <button
       type="button"
-      onClick={onOpen}
-      aria-label={openAria}
-      className="btn-ember focus-ring"
+      onClick={isMobile ? onOpenOverlay : onToggleBackground}
+      aria-label={playAria}
+      aria-pressed={playActive}
+      className="btn-ember btn-ember--sm focus-ring"
     >
-      <span>{exploreLabel}</span>
-      <ArrowCircle />
+      <span>{playVideoLabel}</span>
+      <PlayArrowCircle active={playActive} size="sm" />
     </button>
+  );
+  const highlightsListLabel = carouselDict.highlightsRegion.replace(
+    "{title}",
+    title,
   );
 
   return (
@@ -780,7 +791,10 @@ function Centerpiece({
             animation: `hero-rise 800ms 260ms cubic-bezier(.2,.7,.3,1) both`,
           }}
         >
-          {ExploreCta}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            {VisitSiteButton}
+            {PlayVideoButton}
+          </div>
 
           <div
             className="mt-3.5 flex flex-wrap gap-2"
@@ -933,40 +947,71 @@ function AutosizeHeadline({
   );
 }
 
-function ArrowCircle() {
+/* Play / pause glyph for the Play Video CTA. Matches the visual weight
+ * of ExternalArrowCircle so the two CTAs sit comfortably on the same
+ * row. `active=true` swaps the triangle for two bars so the button
+ * reads correctly when the background video is already playing.
+ *
+ * The play path is chosen so the triangle's *visual* center sits on
+ * the SVG's geometric center: a normal "M8 5v14l11-7z" play path has
+ * its centroid shifted right of the viewBox center because the apex
+ * carries the same pixel mass as the barbs. We mirror that by leaving
+ * a touch of empty space on the right (apex slightly past the
+ * midpoint) so the glyph reads centered inside the 22–28px circle
+ * without any translateX hack. */
+function PlayArrowCircle({
+  active = false,
+  size = "md",
+}: {
+  active?: boolean;
+  size?: "sm" | "md";
+}) {
+  const dim = size === "sm" ? "h-[22px] w-[22px]" : "h-7 w-7";
+  const svg = size === "sm" ? 10 : 12;
   return (
     <span
       aria-hidden
-      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--paper-on-night)] text-[var(--ember)]"
+      className={`inline-flex items-center justify-center rounded-full bg-[var(--paper-on-night)] text-[var(--ember)] ${dim}`}
     >
-      <svg
-        width="13"
-        height="13"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M5 12h14" />
-        <path d="m13 6 6 6-6 6" />
-      </svg>
+      {active ? (
+        <svg
+          width={svg}
+          height={svg}
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden
+        >
+          <rect x="6.5" y="5" width="3.6" height="14" rx="1.2" />
+          <rect x="13.9" y="5" width="3.6" height="14" rx="1.2" />
+        </svg>
+      ) : (
+        <svg
+          width={svg}
+          height={svg}
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden
+        >
+          <path d="M9 5v14l10-7z" />
+        </svg>
+      )}
     </span>
   );
 }
 
 /* Diagonal arrow — signals an off-site jump for the external-link
  * variant of the Explore CTA (CupOracle → cuporacle.xyz). */
-function ExternalArrowCircle() {
+function ExternalArrowCircle({ size = "md" }: { size?: "sm" | "md" }) {
+  const dim = size === "sm" ? "h-[22px] w-[22px]" : "h-7 w-7";
+  const svg = size === "sm" ? 11 : 13;
   return (
     <span
       aria-hidden
-      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--paper-on-night)] text-[var(--ember)]"
+      className={`inline-flex items-center justify-center rounded-full bg-[var(--paper-on-night)] text-[var(--ember)] ${dim}`}
     >
       <svg
-        width="13"
-        height="13"
+        width={svg}
+        height={svg}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -1193,90 +1238,6 @@ function taglineFor(work: Work): string {
   // Try the first clause up to a comma / period
   const first = desc.split(/[，。,.；;]/)[0].trim();
   return first.length > 36 ? first.slice(0, 34) + "…" : first;
-}
-
-/* ----------------------------------------------------------------
- * PlayControl — large circular button that toggles the background
- * video on/off. When idle it shows a play glyph over the static
- * image; once playing it becomes a pause control.
- * ---------------------------------------------------------------- */
-function PlayControl({
-  isMobile,
-  isPlaying,
-  onToggleBackground,
-  onOpenOverlay,
-  playLabel,
-  pauseLabel,
-  openLabel,
-}: {
-  isMobile: boolean;
-  isPlaying: boolean;
-  onToggleBackground: () => void;
-  onOpenOverlay: () => void;
-  playLabel: string;
-  pauseLabel: string;
-  openLabel: string;
-}) {
-  // On mobile the button opens a full-screen overlay player (the .mov
-  // sources don't play inline on small screens / Android, and an inline
-  // background video fights the carousel's swipe gestures). On desktop it
-  // toggles the cinematic background video as before.
-  const overlayMode = isMobile;
-  const active = overlayMode ? false : isPlaying;
-
-  return (
-    <button
-      type="button"
-      onClick={overlayMode ? onOpenOverlay : onToggleBackground}
-      aria-label={
-        active
-          ? pauseLabel
-          : overlayMode
-            ? openLabel
-            : playLabel
-      }
-      aria-pressed={active}
-      className="focus-ring group absolute right-4 bottom-6 z-20 flex h-[60px] w-[60px] items-center justify-center rounded-full border border-white/20 bg-white/[0.07] text-[var(--paper-on-night)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/[0.14] sm:right-5 sm:bottom-auto sm:top-1/2 sm:h-[84px] sm:w-[84px] sm:-translate-y-1/2"
-    >
-      {/* subtle inner ring */}
-      <span
-        aria-hidden
-        className="absolute inset-1 rounded-full ring-1 ring-white/10 transition-all duration-300 group-hover:ring-white/25"
-      />
-      {active ? <PauseIcon /> : <PlayIcon />}
-    </button>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg
-      width="26"
-      height="26"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-      className="ml-1 transition-transform duration-300 group-hover:scale-110"
-    >
-      <path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5Z" />
-    </svg>
-  );
-}
-
-function PauseIcon() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-      className="transition-transform duration-300 group-hover:scale-110"
-    >
-      <rect x="6.5" y="5" width="3.6" height="14" rx="1.2" />
-      <rect x="13.9" y="5" width="3.6" height="14" rx="1.2" />
-    </svg>
-  );
 }
 
 /* ----------------------------------------------------------------
