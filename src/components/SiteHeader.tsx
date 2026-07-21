@@ -50,8 +50,6 @@ export function SiteHeader() {
   const NAV: NavItem[] = [
     { label: dict.nav.works, href: `${basePath}/` },
     { label: dict.nav.about, href: `${basePath}/resume#about` },
-    { label: dict.nav.resume, href: `${basePath}/resume/` },
-    { label: dict.nav.contact, href: "mailto:hello@studio.local" },
   ];
 
   return (
@@ -83,7 +81,7 @@ export function SiteHeader() {
             className="hidden flex-1 items-center justify-center md:flex"
           >
             <div
-              className="flex items-center gap-8 rounded-full border border-white/[0.11] bg-white/[0.03] px-7 py-2.5 backdrop-blur-sm"
+              className="flex items-center gap-6 rounded-full border border-white/[0.11] bg-white/[0.03] px-5 py-2.5 backdrop-blur-sm"
               style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
             >
               {NAV.map((item) => (

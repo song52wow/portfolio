@@ -6,9 +6,7 @@
   },
   "nav": {
     "works": "Works",
-    "about": "About",
-    "resume": "Resume",
-    "contact": "Contact"
+    "about": "About"
   },
   "header": {
     "homeAria": "Go to home",
