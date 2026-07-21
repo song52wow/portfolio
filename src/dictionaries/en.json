@@ -49,17 +49,305 @@
     "overlayTitle": "{title} video"
   },
   "resume": {
-    "title": "Hari — Exhibition Works — Resume",
-    "description": "Resume · An index of moving-image works.",
+    "title": "Hari — Resume · 简历",
+    "description": "Full-Stack Engineer (Frontend-leaning) / Frontend Architect / AI Application Engineer — resume and projects.",
     "sectionResume": "RESUME · 简历",
     "sectionSummary": "Summary",
-    "sectionExperience": "Experience",
-    "sectionWorks": "Selected Works · 作品",
-    "sectionSkills": "Skills",
+    "sectionAbout": "About Me",
+    "sectionExperience": "Work Experience",
+    "sectionProjects": "Core Projects",
+    "sectionTechStack": "Tech Stack",
+    "sectionBreakthroughs": "Core Technical Breakthroughs",
     "sectionContact": "Contact",
     "contactEmail": "EMAIL",
     "contactGithub": "GITHUB",
-    "contactSite": "SITE"
+    "contactSite": "SITE",
+    "contactExperience": "Experience",
+    "contactLocation": "Location",
+    "liveDemo": "Live demo",
+    "coreContributions": "Key contributions",
+    "stack": "Tech stack",
+    "name": "Hari",
+    "role": "Full-Stack Engineer (Frontend-leaning) / Frontend Architect / AI Application Engineer",
+    "experienceYears": "8+ Years",
+    "location": "Shenzhen",
+    "email": "song52wow@gmail.com",
+    "github": "song52wow",
+    "siteUrl": "https://www.song52wow.xyz",
+    "about": [
+      "Full-stack engineer with 8+ years of frontend and full-stack development experience across complex domains including AI data engineering, Web3 multi-chain ecosystems, and Chrome/Telegram cross-platform development.",
+      "Led or contributed substantially to multiple production-grade projects and an NPM SDK, continuously refining a pnpm + Turborepo Monorepo engineering practice.",
+      "Helped ship AI model data production pipelines (multimodal annotation / browser-side OCR / annotation incentives), with hands-on engineering experience spanning frontend interactions and server-side collaboration.",
+      "Delivered Web3 products across multiple chains and wallets, including multi-chain wallet integration and typed contract client auto-generation, while continuing to explore AI Agent × Web3 on-chain data integration.",
+      "Use Claude Code / Cursor / Codex as primary daily coding assistants to accelerate delivery in complex engineering scenarios."
+    ],
+    "experience": [
+      {
+        "company": "Pundi X Labs",
+        "role": "Web Frontend Engineer",
+        "period": "2018.06 — 2026.04",
+        "location": "Shenzhen",
+        "domain": "Web3 & DApp Development",
+        "summary": "Key Contributions",
+        "contributions": [
+          "Led multiple production-grade projects spanning AI data engineering, Web3 DApps, Chrome extensions, an NPM SDK, and the Telegram ecosystem, unifying them around a pnpm + Turborepo Monorepo engineering practice.",
+          "Designed a multi-chain Web3 integration layer that abstracts signing differences across heterogeneous chains (EVM / Cosmos / Tron / Avalanche, etc.) and integrates mainstream wallets (MetaMask / WalletConnect / Ledger / Privy / Reown AppKit, etc.).",
+          "Built a dual ecosystem spanning Chrome MV3 extensions and Telegram Mini Apps: Popup / Content / Worker decoupling + MutationObserver SPA injection + rich-interaction rendering with Pixi.js / Konva, supporting delivery across multiple applications.",
+          "Established cross-framework engineering patterns with strongly typed TypeScript contracts + a Veaury cross-framework bridge + a Deno / grammy orchestration system (multiple command types + HMAC verification + i18n), standardizing frontend-backend boundaries."
+        ],
+        "stack": [
+          "Vue 3",
+          "React",
+          "TypeScript",
+          "ethers.js / viem",
+          "WalletConnect",
+          "Deno",
+          "grammy",
+          "Chrome MV3",
+          "Pixi.js",
+          "Konva",
+          "pnpm Monorepo",
+          "Turborepo",
+          "Cypress"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "title": "CupOracle — 2026 FIFA World Cup AI Prediction Platform",
+        "period": "2026.06 — Present",
+        "domain": "AI + Sports Data",
+        "format": "Next.js 14 + Cloudflare Workers Monorepo",
+        "liveUrl": "https://www.song52wow.xyz",
+        "liveLabel": "Live Demo",
+        "summary": "An AI-powered World Cup match outcome prediction dashboard supporting parallel predictions across multiple models, deployed on Cloudflare's full-stack ecosystem.",
+        "contributions": [
+          "Built a Next.js 14 App Router + RSC full-stack website with complete Edge Runtime coverage, eliminated CORS through rewrites proxying, and added a Mock fallback to preserve the development experience during D1 cold starts.",
+          "Designed a Cloudflare Workers (Hono) + D1 backend architecture for match and prediction data queries, supporting multidimensional tournament analysis.",
+          "Integrated OpenAI-compatible APIs (DeepSeek / GLM / MiMo / MiniMax) for parallel multi-model prediction, with flexible prediction-engine switching through the LLM_PREDICTION_MODELS configuration."
+        ],
+        "tags": [
+          "React 18",
+          "Next.js 14",
+          "TypeScript",
+          "Tailwind CSS",
+          "ECharts",
+          "Cloudflare Workers",
+          "D1",
+          "Hono"
+        ]
+      },
+      {
+        "title": "Privy Vue Adapter (Web3 Authentication SDK)",
+        "period": "2025.06 — 2025.12",
+        "domain": "Web3 Identity Authentication / Open-Source NPM Library",
+        "format": "Vue + React Turborepo Library",
+        "liveUrl": "https://www.npmjs.com/package/privy-veaury-vue",
+        "liveLabel": "Dependency Package",
+        "summary": "A custom cross-framework adapter that solves a key limitation: Web3 social and wallet authentication services offered only a React SDK, preventing Vue applications from reusing it directly.",
+        "contributions": [
+          "Bridged the React Provider and Login dialog into Vue components with Veaury 2.6 (applyPureReactInVue), wrapping the @privy-io/react-auth rendering container so consumers did not need to rewrite the authentication UI.",
+          "Designed a three-layer Pinia store abstraction: sdk (raw wallets / activeWallet) / controller (userStatus / walletStatus business state machine) / inside (providerConfig + localStorage persistence), decoupled from the genapi auto-generated OpenAPI client.",
+          "Further encapsulated multi-wallet detection, default lists, and Farcaster MiniApp SDK adaptation for @base-org/account + viem + @binance/w3w-ethereum-provider through privy-veaury-vue.",
+          "Fixed v1.1.1-2 external wallet connection and login callback timing bugs, established a LOGINED/LOGOUT × DISCONNECTED composite state machine, and retained a reference React demo in the monorepo as a regression baseline."
+        ],
+        "tags": [
+          "Vue 3.5",
+          "React 19",
+          "Veaury 2.6",
+          "Pinia 3",
+          "Vite 7",
+          "@privy-io/react-auth",
+          "viem",
+          "Turborepo",
+          "Changesets"
+        ]
+      },
+      {
+        "title": "Decentralized Token Launch Platform",
+        "period": "2024.08 — 2026.01",
+        "domain": "Web3 Launchpad / Cultural & Meme Tokens",
+        "format": "pnpm Monorepo with Multiple Sub-Apps",
+        "liveUrl": "https://www.song52wow.xyz/?w=pump",
+        "liveLabel": "Live Demo",
+        "summary": "A decentralized token launch platform on the Base network, focused on permissionless issuance and trading of cultural, meme, and community-driven digital assets, with access from both PC and in-wallet DApps.",
+        "contributions": [
+          "Shipped five core routes—token discovery / CreateToken / TradingToken / MyDataToken / Exit—with automatic switching between PC and in-wallet DApps through the Farcaster MiniApp SDK.",
+          "Integrated custom TradingView configurations + real-time WebSocket market data + ECharts as a dual-engine solution covering candlestick charts, market depth, and on-chain data visualization.",
+          "Combined the Ethers v5 + viem + viem/Privy stacks to support Base login and signing, paired with TypeChain + GenAPI to auto-generate typed contract and HTTP clients.",
+          "Built the pnpm monorepo; combined Element Plus + Naive UI + Reka UI + UnoCSS in the UI layer and used GSAP to enhance token-launch and exit animations."
+        ],
+        "tags": [
+          "Vue 3",
+          "TypeScript",
+          "Vite 5",
+          "Pinia",
+          "UnoCSS",
+          "Element Plus",
+          "Naive UI",
+          "TradingView",
+          "ECharts",
+          "ethers v5",
+          "viem",
+          "Privy",
+          "Farcaster MiniApp",
+          "pnpm"
+        ]
+      },
+      {
+        "title": "AI Data Crowdsourcing Collaboration Platform (Large-Scale Monorepo)",
+        "period": "2024.08 — 2025.12",
+        "domain": "AI Infrastructure / Data Engineering",
+        "format": "Multiple Sub-Apps and Packages",
+        "summary": "A core data annotation workstation for AI model training, supporting multimodal data (text/image/audio) and incorporating Web3 Token economic incentives to encourage participation.",
+        "contributions": [
+          "Built a high-frequency Canvas annotation engine with Konva, supporting complex skeleton keypoints and polygon cropping and providing a better fit for high-frequency interactions than traditional SVG approaches.",
+          "Added upfront OCR parsing with Tesseract.js, running recognition directly in the browser to protect data privacy and reduce cloud request overhead.",
+          "Designed a high-cohesion, low-coupling pnpm Monorepo boundary strategy, improving component reuse across platforms.",
+          "Applied TypeChain strong typing across full-stack and smart contract interactions, reducing runtime risks caused by mismatched ABI parameters."
+        ],
+        "tags": ["Vue 3", "Konva", "Tesseract.js", "viem", "Vite"]
+      },
+      {
+        "title": "Social Tweet AI Annotation Browser Extension",
+        "period": "2024.08 — 2024.11",
+        "domain": "AI Data Engineering / Chrome MV3 Extension",
+        "format": "pnpm + Turbo Monorepo",
+        "liveUrl": "https://www.song52wow.xyz/?w=extension-purse",
+        "liveLabel": "Live Demo",
+        "summary": "A browser extension for AI training data production that injects into Twitter/X and target sites, connecting tweet annotation (sentiment analysis / topic classification / named entity recognition), XP incentives, and Web3 wallet withdrawals into an \"annotation → XP → on-chain reward\" AI data crowdsourcing loop.",
+        "contributions": [
+          "Injected annotation panels into X/Twitter tweets from the content surface, covering sentiment analysis / topic classification / named entity recognition, with mark.js + GSAP providing text highlighting and animations.",
+          "Designed difficulty-based incentives of basic 5 / standard 10 / expert 50 XP, with an additional +10 XP per tweet and a +500 XP cap, using TaskList / XpLevel real-time progress bars to reinforce task-driven engagement.",
+          "Integrated secure 2FA login, wallet connection, and withdrawal-history views in the popup, with contract ABI abstractions + wallet.ts handling on-chain token reward settlement.",
+          "Built the pnpm + Turbo monorepo, with three surfaces (content / background service worker / popup) sharing abstractions for messaging and storage APIs."
+        ],
+        "tags": [
+          "Vue 3",
+          "TypeScript",
+          "Vite 5",
+          "Pinia",
+          "Element Plus",
+          "UnoCSS",
+          "mark.js",
+          "GSAP",
+          "ethers/viem",
+          "Chrome MV3",
+          "Turbo"
+        ]
+      },
+      {
+        "title": "Telegram Decentralized Social & Progression Gaming Ecosystem",
+        "period": "2023.08 — 2024.03",
+        "domain": "Telegram Mini App / Bot Ecosystem",
+        "format": "Telegram Web App (TWA) + Microservices Platform",
+        "summary": "Built decentralized interactive social systems and gaming ecosystems, such as progression-game economic models, for Telegram's open platform.",
+        "contributions": [
+          "Used Deno with the Oak framework as the Bot orchestration node, leveraging its built-in TypeScript secure sandbox and interceptor decorators (@Logger/@Trycatch) to build the middleware processing pipeline.",
+          "Combined Pixi.js / Konva in the Mini App to build rich interactive interfaces, including large-scale cross-platform touch interactions and game-farm orchestration rendering.",
+          "Adapted embedded WebView layout differences across Telegram clients on iOS / Android / Windows through a single postcss configuration layer.",
+          "Used grammy on the Bot side to orchestrate multiple command types and unify private chat / Inline / Callback / Contact message handling, with HMAC-SHA256 initData verification preventing forged WebAppData and a complete grammy-i18n multilingual middleware chain."
+        ],
+        "tags": ["Deno", "grammy", "Pixi.js", "Vue/React"]
+      },
+      {
+        "title": "Web3 Social Prediction Platform",
+        "period": "2022.05 — 2023.06",
+        "domain": "Web3 DApp / On-Chain Prediction Markets",
+        "format": "pnpm Multi-Build-Tool Monorepo",
+        "liveUrl": "https://www.song52wow.xyz/?w=baabaabet",
+        "liveLabel": "Live Demo",
+        "summary": "A Web3 on-chain prediction DApp covering an event lobby, order processing, user-created events, Membership NFTs, and a full personal-center flow, with one common workspace deployed in parallel to two public chains.",
+        "contributions": [
+          "Shipped multiple business modules: event lobby (multiple themed entry points) / single, parlay, and system markets / on-chain transaction tracking / CreateEvent user-created predictions / Membership NFT minting and display / Mine personal center (History / Resolution / Statistics / Task rewards).",
+          "Designed a parallel multi-chain architecture: Vite (primary chain) + Vue CLI 5 webpack (multiple secondary chains), sharing a common workspace to reuse foundational capabilities.",
+          "Built an abi-types-generator script to generate multiple contract TS types in one command, integrating ethers v5 + WalletConnect v1 + MetaMask across multiple wallets.",
+          "Used PIXI.js v7 for slot-machine visuals and animation, GSAP Business + Lottie for motion, and ECharts + Highcharts for charts; optimized assets with SVG sprites + CSS sprites; orchestrated images with Dockerfile + docker-compose."
+        ],
+        "tags": [
+          "Vue 3",
+          "TypeScript",
+          "Vite",
+          "Vue CLI 5",
+          "Pinia",
+          "Element Plus",
+          "UnoCSS",
+          "ethers v5",
+          "WalletConnect v1",
+          "Apollo GraphQL",
+          "PIXI.js 7",
+          "GSAP",
+          "Lottie",
+          "ECharts",
+          "pnpm"
+        ]
+      }
+    ],
+    "techStack": [
+      {
+        "category": "Frontend Engineering",
+        "items": [
+          "Core Stack: Vue 3 (multiple large-scale projects) / React (18-19) / TypeScript (advanced type modeling & API client auto-generation)",
+          "Build Tooling: Webpack / Vite 6 / Turborepo / pnpm workspace + Changesets",
+          "UI Design Systems: Element Plus / Radix UI / Reka UI / UnoCSS / Vant"
+        ]
+      },
+      {
+        "category": "Web3 & Blockchain",
+        "items": [
+          "Chain Ecosystem: Multiple heterogeneous chains (Ethereum, Cosmos, Tron, Avalanche, Arbitrum, BSC, etc.)",
+          "Core Libraries: ethers.js (v5/v6) / viem / TypeChain",
+          "Wallet Integration: WalletConnect / MetaMask / Ledger / Privy / Reown AppKit"
+        ]
+      },
+      {
+        "category": "AI & Cross-Platform Development",
+        "items": [
+          "Graphics & Interaction: Konva (high-performance Canvas) / Three.js / Pixi.js / Tesseract.js (private browser-side OCR) / GSAP",
+          "Cross-Platform Technologies: Chrome Extension (Popup/Content/Worker multi-surface architecture) / Telegram Mini App (end-to-end business workflows)"
+        ]
+      },
+      {
+        "category": "Backend",
+        "items": [
+          "Server Runtimes: Node.js (Express) / Deno (Oak, grammy) / GraphQL (Apollo)",
+          "Cloud-Native Deployment: Docker"
+        ]
+      },
+      {
+        "category": "Tools & Dev Environment",
+        "items": [
+          "AI Coding Assistants: Claude Code / Cursor / Codex (daily drivers)",
+          "Version Control & CI/CD: Git / GitHub Actions / Docker"
+        ]
+      }
+    ],
+    "breakthroughs": [
+      {
+        "challenge": "Fragmented multi-chain signing protocols",
+        "solution": "Designed a unified Connector abstraction layer that wraps signing differences across heterogeneous chains—including eth_requestAccounts / cosmos_signAmino / tron_requestAccounts—behind a single API, backed by full-flow Cypress E2E regression to reduce chain-switching costs for application teams."
+      },
+      {
+        "challenge": "Telegram WebApp signature verification",
+        "solution": "Used HMAC-SHA256 initData verification to block forged WebAppData requests; orchestrated multiple command types and unified private chat / Inline / Callback / Contact message handling with grammy, backed by a complete grammy-i18n multilingual middleware chain."
+      },
+      {
+        "challenge": "Cross-framework ecosystem fragmentation",
+        "solution": "Used the Veaury bridge layer to mount React 19 component trees directly in Vue 3, enabling Privy—the React-only Web3 authentication library—to run seamlessly in Vue projects."
+      },
+      {
+        "challenge": "Large-Scale Monorepo boundary strategy",
+        "solution": "Maintained a pnpm + Turborepo system spanning multiple sub-apps and atomic modules, with TypeChain + GenAPI auto-generating typed contract and HTTP clients to establish reusable engineering patterns."
+      },
+      {
+        "challenge": "Chrome MV3 SPA injection",
+        "solution": "Decoupled popup + content + background, broadcast state in real time through chrome.runtime.Port, and used MutationObserver to monitor SPA routes (#react-root), extending the native tweet entry point with Web3 capabilities."
+      },
+      {
+        "challenge": "Fragmented cross-platform layouts",
+        "solution": "Used a single postcss-px-to-viewport configuration with no media queries to support embedded WebViews across Telegram clients on iOS / Android / Windows, eliminating platform-specific layout differences."
+      }
+    ]
   },
   "works": {
     "cuporacle": {
@@ -68,7 +356,7 @@
       "highlights": [
         "Next.js 14 App Router + RSC + Edge Runtime, rewrites proxy to kill cross-origin issues",
         "Cloudflare Workers (Hono) + D1 backend, Mock fallback for cold-start dev experience",
-        "OpenAI-compatible parallel multi-model: DeepSeek / GLM / MiMo / others",
+        "OpenAI-compatible parallel multi-model: DeepSeek / GLM / MiMo / MiniMax",
         "LLM_PREDICTION_MODELS env var to swap prediction engines on the fly"
       ]
     },

@@ -49,34 +49,322 @@
     "overlayTitle": "{title} 视频"
   },
   "resume": {
-    "title": "Hari — Exhibition Works — Resume",
-    "description": "简历 · 个人影像作品集。",
+    "title": "Hari — 简历 · Resume",
+    "description": "全栈工程师（偏前端）/ 前端架构师 / AI 应用开发 — 简历与项目经历。",
     "sectionResume": "RESUME · 简历",
     "sectionSummary": "概要",
+    "sectionAbout": "关于我",
     "sectionExperience": "工作经历",
-    "sectionWorks": "作品 · Selected Works",
-    "sectionSkills": "技能",
+    "sectionProjects": "核心项目实战",
+    "sectionTechStack": "技能栈",
+    "sectionBreakthroughs": "核心技术攻坚",
     "sectionContact": "联系方式",
     "contactEmail": "EMAIL",
     "contactGithub": "GITHUB",
-    "contactSite": "SITE"
+    "contactSite": "SITE",
+    "contactExperience": "经验",
+    "contactLocation": "坐标",
+    "liveDemo": "在线演示",
+    "coreContributions": "核心贡献",
+    "stack": "技术栈",
+    "name": "Hari",
+    "role": "全栈工程师（偏前端） / 前端架构师 / AI 应用开发",
+    "experienceYears": "8+ Years",
+    "location": "Shenzhen",
+    "email": "song52wow@gmail.com",
+    "github": "song52wow",
+    "siteUrl": "https://www.song52wow.xyz",
+    "about": [
+      "拥有 8 年以上前端及全栈开发经验，长期参与 AI 数据工程、Web3 多链生态、Chrome/Telegram 跨平台开发 等复杂业务场景。",
+      "主导或深度参与多个生产级项目与一款 NPM SDK，持续建设 pnpm + Turborepo Monorepo 工程范式。",
+      "参与落地 AI 大模型数据生产链路（多模态标注 / 浏览器端 OCR / 标注激励），具备从前端交互到服务端协作的工程化经验。",
+      "在 Web3 方向完成跨多公链、多钱包的产品交付（涵盖多链钱包集成与合约类型化客户端自动生成），持续关注 AI Agent × Web3 链上数据融合方向。",
+      "日常以 Claude Code / Cursor / Codex 为主要编程辅助工具，在复杂工程场景下辅助提效。"
+    ],
+    "experience": [
+      {
+        "company": "Pundi X Labs",
+        "role": "Web 前端工程师",
+        "period": "2018.06 — 2026.04",
+        "location": "深圳",
+        "domain": "Web3 & DApp 开发",
+        "summary": "核心成果",
+        "contributions": [
+          "主导多个生产级项目（涵盖 AI 数据工程、Web3 DApp、Chrome 扩展、NPM SDK、TG 生态），统一 pnpm + Turborepo Monorepo 工程范式。",
+          "设计多链 Web3 集成层，封装异构公链（EVM / Cosmos / Tron / Avalanche 等）签名差异，对接主流钱包（MetaMask / WalletConnect / Ledger / Privy / Reown AppKit 等）。",
+          "构建 Chrome MV3 扩展 + Telegram Mini App 双生态：Popup / Content / Worker 三端解耦 + MutationObserver SPA 注入 + Pixi.js / Konva 富交互渲染，支持多款应用交付。",
+          "沉淀跨框架工程范式：TypeScript 强类型契约 + Veaury 跨框架桥接 + Deno / grammy 调度体系（多类命令 + HMAC 验签 + i18n），统一前后端边界。"
+        ],
+        "stack": [
+          "Vue 3",
+          "React",
+          "TypeScript",
+          "ethers.js / viem",
+          "WalletConnect",
+          "Deno",
+          "grammy",
+          "Chrome MV3",
+          "Pixi.js",
+          "Konva",
+          "pnpm Monorepo",
+          "Turborepo",
+          "Cypress"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "title": "CupOracle — 2026 世界杯 AI 预测展示平台",
+        "period": "2026.06 — 至今",
+        "domain": "AI + 体育数据",
+        "format": "Next.js 14 + Cloudflare Workers Monorepo",
+        "liveUrl": "https://www.song52wow.xyz",
+        "liveLabel": "在线演示",
+        "summary": "面向世界杯正赛的 AI 胜率预测 Web 仪表盘，支持多模型并行预测，部署在 Cloudflare 全栈生态。",
+        "contributions": [
+          "构建 Next.js 14 App Router + RSC 全栈官网，Edge Runtime 全覆盖，通过 rewrites 代理消除跨域，Mock fallback 机制保障 D1 冷启动下的开发体验。",
+          "设计 Cloudflare Workers (Hono) + D1 后端架构，实现比赛/预测数据查询，支撑多维度赛事分析。",
+          "集成 OpenAI 兼容接口（DeepSeek / GLM / MiMo / MiniMax）多模型并行预测，通过 LLM_PREDICTION_MODELS 配置灵活切换预测引擎。"
+        ],
+        "tags": [
+          "React 18",
+          "Next.js 14",
+          "TypeScript",
+          "Tailwind CSS",
+          "ECharts",
+          "Cloudflare Workers",
+          "D1",
+          "Hono"
+        ]
+      },
+      {
+        "title": "Privy Vue 适配层（Web3 认证 SDK）",
+        "period": "2025.06 — 2025.12",
+        "domain": "Web3 身份认证 / 开源 NPM 库",
+        "format": "Vue + React 双端 Turborepo 库",
+        "liveUrl": "https://www.npmjs.com/package/privy-veaury-vue",
+        "liveLabel": "依赖包",
+        "summary": "自研跨框架适配层库，解决 Web3 社交/钱包认证服务官方只提供 React SDK 而 Vue 业务方无法直接复用的痛点。",
+        "contributions": [
+          "用 Veaury 2.6（applyPureReactInVue）把 React 版 Provider 与 Login 弹窗桥接为 Vue 组件，包裹 @privy-io/react-auth 渲染容器，避免业务方重写认证 UI。",
+          "设计 Pinia 三层 store 抽象：sdk（原始 wallets / activeWallet）/ controller（userStatus / walletStatus 业务态机）/ inside（providerConfig + localStorage 持久化），与 genapi 自动生成的 OpenAPI 客户端解耦。",
+          "通过 privy-veaury-vue 进一步封装 @base-org/account + viem + @binance/w3w-ethereum-provider 多钱包检测、默认列表与 Farcaster MiniApp SDK 适配。",
+          "修复 v1.1.1-2 外部钱包连接与登录回调时序 bug，建立 LOGINED/LOGOUT × DISCONNECTED 状态组合机；monorepo 同步保留 React 端对照 demo 便于回归基线。"
+        ],
+        "tags": [
+          "Vue 3.5",
+          "React 19",
+          "Veaury 2.6",
+          "Pinia 3",
+          "Vite 7",
+          "@privy-io/react-auth",
+          "viem",
+          "Turborepo",
+          "Changesets"
+        ]
+      },
+      {
+        "title": "去中心化代币启动平台",
+        "period": "2024.08 — 2026.01",
+        "domain": "Web3 Launchpad / 文化币 & Meme 币",
+        "format": "pnpm Monorepo 多子应用",
+        "liveUrl": "https://www.song52wow.xyz/?w=pump",
+        "liveLabel": "在线演示",
+        "summary": "基于 Base 网络的去中心化代币启动平台，专注文化币 / Meme 币 / 社区驱动型数字资产的无许可发行与交易，配套 PC + 钱包内 DApp 双端访问。",
+        "contributions": [
+          "落地代币发现 / CreateToken / TradingToken / MyDataToken / Exit 五大核心路由，PC 端 + 钱包内 DApp 通过 Farcaster MiniApp SDK 自动切换。",
+          "集成 TradingView 自定义配置 + 实时 WebSocket 行情 + ECharts 双引擎，覆盖 K 线、深度、链上数据可视化。",
+          "Ethers v5 + viem + viem/Privy 双栈合约调用打通 Base 链登录与签名，配合 TypeChain + GenAPI 自动生成类型化合约客户端与 HTTP 客户端。",
+          "搭建 pnpm monorepo；UI 层混合 Element Plus + Naive UI + Reka UI + UnoCSS，配合 GSAP 强化打新/退出动效。"
+        ],
+        "tags": [
+          "Vue 3",
+          "TypeScript",
+          "Vite 5",
+          "Pinia",
+          "UnoCSS",
+          "Element Plus",
+          "Naive UI",
+          "TradingView",
+          "ECharts",
+          "ethers v5",
+          "viem",
+          "Privy",
+          "Farcaster MiniApp",
+          "pnpm"
+        ]
+      },
+      {
+        "title": "AI 数据众包协作平台（大型 Monorepo）",
+        "period": "2024.08 — 2025.12",
+        "domain": "AI 基础设施 / 数据工程",
+        "format": "多子应用多包",
+        "summary": "面向大模型训练的数据标注核心工作站，支持多模态（文本/图像/音频）并结合 Web3 Token 经济模型激励流动性。",
+        "contributions": [
+          "基于 Konva 构建底层高频 Canvas 标注引擎，支持复杂骨架点/多边形截取，相较传统 SVG 方案更适合高频交互场景。",
+          "前置 OCR 解析能力，集成 Tesseract.js 直接在浏览器端完成识别，保护数据隐私并减少云端请求开销。",
+          "设计高内聚低耦合的 pnpm Monorepo 边界策略，提升跨终端组件复用效率。",
+          "将 TypeChain 强类型约束注入全栈与智能合约交互，降低 ABI 参数不一致带来的运行时风险。"
+        ],
+        "tags": ["Vue 3", "Konva", "Tesseract.js", "viem", "Vite"]
+      },
+      {
+        "title": "社交推文 AI 标注浏览器插件",
+        "period": "2024.08 — 2024.11",
+        "domain": "AI 数据工程 / Chrome MV3 扩展",
+        "format": "pnpm + Turbo Monorepo",
+        "liveUrl": "https://www.song52wow.xyz/?w=extension-purse",
+        "liveLabel": "在线演示",
+        "summary": "面向 AI 训练数据生产的浏览器扩展，注入 Twitter/X 与目标站点，把推文 AI 标注（情感分析 / 主题分类 / 命名实体识别）、XP 积分激励、Web3 钱包提现串成「标注 → 积分 → 链上奖励」AI 数据众包闭环。",
+        "contributions": [
+          "content 端向 X/Twitter 推文注入标注面板，覆盖情感分析 / 主题分类 / 命名实体识别 三类打标，配套 mark.js + GSAP 完成文本高亮与动效。",
+          "设计按 basic 5 / standard 10 / expert 50 XP 难度分级激励，单推文额外 +10 XP、上限 +500 XP，结合 TaskList / XpLevel 实时进度条强化任务驱动感。",
+          "popup 端集成 2FA 安全登录、钱包连接与提现记录视图，通过合约 ABI 抽象 + wallet.ts 实现链上代币奖励结算。",
+          "搭建 pnpm + Turbo monorepo，三端（content / background service worker / popup）通过共享抽象打通消息与存储 API。"
+        ],
+        "tags": [
+          "Vue 3",
+          "TypeScript",
+          "Vite 5",
+          "Pinia",
+          "Element Plus",
+          "UnoCSS",
+          "mark.js",
+          "GSAP",
+          "ethers/viem",
+          "Chrome MV3",
+          "Turbo"
+        ]
+      },
+      {
+        "title": "Telegram 去中心化社交 & 养成游戏生态",
+        "period": "2023.08 — 2024.03",
+        "domain": "Telegram Mini App / Bot 生态",
+        "format": "Telegram Web App (TWA) + 微服务中台",
+        "summary": "面向 Telegram 开放平台，定制去中心化互动社交系统与游戏生态（例如养成类游戏经济模型）。",
+        "contributions": [
+          "采用 Deno 搭配 Oak 框架作为 Bot 调度节点，利用内置 TypeScript 安全沙箱和拦截装饰器（@Logger/@Trycatch）构建中间件处理链路。",
+          "小程序侧引入 Pixi.js / Konva 组合构建富交互界面（如大型跨端触控操作与游戏农场调度渲染）。",
+          "通过一套 postcss 配置层适配 Telegram iOS / Android / Windows 客户端内嵌 WebView 布局差异。",
+          "Bot 端用 grammy 编排多类命令 + 私聊/Inline/Callback/Contact 多类消息统一处理，HMAC-SHA256 initData 验签防 WebAppData 伪造，grammy-i18n 完整多语言中间件链。"
+        ],
+        "tags": ["Deno", "grammy", "Pixi.js", "Vue/React"]
+      },
+      {
+        "title": "Web3 社交预测平台",
+        "period": "2022.05 — 2023.06",
+        "domain": "Web3 DApp / 链上预测市场",
+        "format": "pnpm 多构建工具链 Monorepo",
+        "liveUrl": "https://www.song52wow.xyz/?w=baabaabet",
+        "liveLabel": "在线演示",
+        "summary": "覆盖赛事大厅、下单处理、自建事件、Membership NFT、个人中心全链路的 Web3 链上预测 DApp，同一套 common workspace 并行部署到两条公链。",
+        "contributions": [
+          "落地多业务模块：赛事大厅（多主题入口）/ 单/串/系统盘口 / 链上交易跟踪 / CreateEvent 用户自建预测 / Membership NFT 铸造展示 / Mine 个人中心（History / Resolution / Statistics / Task 任务奖励）。",
+          "多链并行架构：Vite（主链）+ Vue CLI 5 webpack（多子链）共用 common workspace 复用基础能力。",
+          "自研 abi-types-generator 脚本一键生成多份合约 TS 类型，ethers v5 + WalletConnect v1 + MetaMask 多钱包接入。",
+          "视觉层用 PIXI.js v7 老虎机/动画、GSAP Business + Lottie 动效、ECharts + Highcharts 图表；资源层用 SVG sprite + 雪碧图优化；Dockerfile + docker-compose 镜像编排。"
+        ],
+        "tags": [
+          "Vue 3",
+          "TypeScript",
+          "Vite",
+          "Vue CLI 5",
+          "Pinia",
+          "Element Plus",
+          "UnoCSS",
+          "ethers v5",
+          "WalletConnect v1",
+          "Apollo GraphQL",
+          "PIXI.js 7",
+          "GSAP",
+          "Lottie",
+          "ECharts",
+          "pnpm"
+        ]
+      }
+    ],
+    "techStack": [
+      {
+        "category": "前端工程",
+        "items": [
+          "核心体系：Vue 3 (多个大型项目) / React (18-19) / TypeScript（复杂类型建模与 API Client 自动生成）",
+          "工程化基建：Webpack / Vite 6 / Turborepo / pnpm workspace + Changesets",
+          "UI 设计系统：Element Plus / Radix UI / Reka UI / UnoCSS / Vant"
+        ]
+      },
+      {
+        "category": "Web3 & 区块链",
+        "items": [
+          "公链生态：跨多异构链 (Ethereum, Cosmos, Tron, Avalanche, Arbitrum, BSC 等)",
+          "核心组件：ethers.js (v5/v6) / viem / TypeChain",
+          "钱包生态集成：WalletConnect / MetaMask / Ledger / Privy / Reown AppKit"
+        ]
+      },
+      {
+        "category": "AI & 跨端扩展开发",
+        "items": [
+          "图形学与交互：Konva（高性能 Canvas）/ Three.js / Pixi.js / Tesseract.js（私有化浏览器端 OCR）/ GSAP",
+          "跨平台技术：Chrome Extension（Popup/Content/Worker 多端架构）/ Telegram Mini App（完整业务闭环）"
+        ]
+      },
+      {
+        "category": "后端",
+        "items": [
+          "服务端运行层：Node.js (Express) / Deno (Oak, grammy) / GraphQL (Apollo)",
+          "云原生部署：Docker"
+        ]
+      },
+      {
+        "category": "工具 & 开发环境",
+        "items": [
+          "AI 辅助编程：Claude Code / Cursor / Codex（日常主力）",
+          "版本控制 & CI/CD：Git / GitHub Actions / Docker"
+        ]
+      }
+    ],
+    "breakthroughs": [
+      {
+        "challenge": "多链签名协议割裂",
+        "solution": "设计统一 Connector 抽象层，以单一 API 封装 eth_requestAccounts / cosmos_signAmino / tron_requestAccounts 等异构公链签名差异，配套 Cypress 全链路 E2E 回归，降低上层业务切链成本。"
+      },
+      {
+        "challenge": "Telegram WebApp 验签防御",
+        "solution": "基于 HMAC-SHA256 initData 验签拦截伪造 WebAppData 请求；grammy 编排多类命令 + 私聊/Inline/Callback/Contact 多类消息统一处理，grammy-i18n 完整多语言中间件链。"
+      },
+      {
+        "challenge": "跨框架生态割裂",
+        "solution": "通过 Veaury 桥接层在 Vue 3 中直接挂载 React 19 组件树，使 Privy（React 专属 Web3 认证库）无缝运行于 Vue 项目中。"
+      },
+      {
+        "challenge": "大型 Monorepo 边界策略",
+        "solution": "维护多个子应用与原子模块的 pnpm + Turborepo 体系，TypeChain + GenAPI 自动生成类型化合约 / HTTP 客户端，沉淀可复用的工程范式。"
+      },
+      {
+        "challenge": "Chrome MV3 SPA 注入",
+        "solution": "popup + content + background 三端解耦 + chrome.runtime.Port 实时状态广播 + MutationObserver 监听 SPA 路由（#react-root）扩展原生发推入口，接入 Web3 业务能力。"
+      },
+      {
+        "challenge": "多端布局碎片化",
+        "solution": "仅用一套 postcss-px-to-viewport 配置且无媒体查询，跑通 Telegram iOS / Android / Windows 客户端内嵌 WebView，消除平台差异。"
+      }
+    ]
   },
   "works": {
     "cuporacle": {
       "title": "世界杯 AI 预测展示平台",
-      "description": "面向 2026 世界杯正赛的 AI 胜率预测仪表盘,多模型并行推理,部署在 Cloudflare 全栈生态。",
+      "description": "面向 2026 世界杯正赛的 AI 胜率预测仪表盘，多模型并行推理，部署在 Cloudflare 全栈生态。",
       "highlights": [
-        "Next.js 14 App Router + RSC + Edge Runtime,rewrites 代理消除跨域",
-        "Cloudflare Workers (Hono) + D1 后端架构,Mock fallback 保障冷启动开发体验",
-        "OpenAI 兼容多模型并行:DeepSeek / GLM / MiMo / 其他",
+        "Next.js 14 App Router + RSC + Edge Runtime，rewrites 代理消除跨域",
+        "Cloudflare Workers (Hono) + D1 后端架构，Mock fallback 保障冷启动开发体验",
+        "OpenAI 兼容多模型并行：DeepSeek / GLM / MiMo / MiniMax",
         "LLM_PREDICTION_MODELS 环境变量灵活切换预测引擎"
       ]
     },
     "pump": {
       "title": "去中心化代币启动平台",
-      "description": "基于 Base 网络的去中心化代币启动平台,文化币 / Meme 币无许可发行与交易,PC + 钱包内 DApp 双端访问。",
+      "description": "基于 Base 网络的去中心化代币启动平台，文化币 / Meme 币无许可发行与交易，PC + 钱包内 DApp 双端访问。",
       "highlights": [
-        "五大核心路由:CreateToken / TradingToken / MyDataToken / Exit / 发现",
+        "五大核心路由：CreateToken / TradingToken / MyDataToken / Exit / 发现",
         "Farcaster MiniApp SDK 自动切换 PC 端 ↔ 钱包内 DApp",
         "TradingView 自定义 + 实时 WebSocket 行情 + ECharts 双引擎",
         "ethers v5 + viem + viem/Privy 双栈合约调用",
@@ -86,18 +374,18 @@
     },
     "extension-purse": {
       "title": "浏览器插件(社交推文 AI 标注)",
-      "description": "面向 AI 训练数据生产的浏览器扩展,把推文标注、XP 积分激励、Web3 钱包奖励串成「标注→积分→链上奖励」众包闭环。",
+      "description": "面向 AI 训练数据生产的浏览器扩展，把推文标注、XP 积分激励、Web3 钱包奖励串成「标注→积分→链上奖励」众包闭环。",
       "highlights": [
-        "content 端向 X / Twitter 推文注入标注面板:情感 / 主题 / NER 三类打标",
-        "XP 分级激励:basic 5 / standard 10 / expert 50,单推文 +10、上限 +500",
-        "mark.js + GSAP 完成文本高亮与动效,TaskList / XpLevel 实时进度条",
+        "content 端向 X / Twitter 推文注入标注面板：情感 / 主题 / NER 三类打标",
+        "XP 分级激励：basic 5 / standard 10 / expert 50，单推文 +10、上限 +500",
+        "mark.js + GSAP 完成文本高亮与动效，TaskList / XpLevel 实时进度条",
         "popup 端集成 2FA 安全登录、钱包连接与提现记录视图",
-        "pnpm + Turbo monorepo,三端 (content / background / popup) 共享抽象"
+        "pnpm + Turbo monorepo，三端 (content / background / popup) 共享抽象"
       ]
     },
     "baabaabet": {
       "title": "社交预测平台",
-      "description": "覆盖赛事大厅、盘口下单、链上交易、CreateEvent、Membership NFT 的 Web3 链上预测 DApp,多链并行 + 多钱包接入。",
+      "description": "覆盖赛事大厅、盘口下单、链上交易、CreateEvent、Membership NFT 的 Web3 链上预测 DApp，多链并行 + 多钱包接入。",
       "highlights": [
         "Vite (主链) + Vue CLI 5 (子链) 共用 common workspace 多链并行架构",
         "自研 abi-types-generator 一键生成多份合约 TS 类型客户端",
