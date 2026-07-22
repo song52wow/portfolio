@@ -36,13 +36,23 @@ export function Resume() {
       className="cinematic cinematic-bg relative min-h-dvh overflow-x-hidden px-5 pb-24 pt-28 sm:px-8 sm:pt-32 lg:px-12 print:max-w-none print:px-6"
     >
       <div className="mx-auto w-full max-w-[1240px]">
-        <ResumeHero name={r.name} role={r.role} kicker={r.sectionResume} />
+        <ResumeHero
+          name={r.name}
+          role={r.role}
+          kicker={r.sectionResume}
+          heroLabel={r.heroLabel}
+          statYears={r.statYears}
+          statProjects={r.statProjects}
+          statEmployers={r.statEmployers}
+          hintSince={r.hintSince}
+        />
         <ResumeContactStrip
           email={r.email}
           emailLabel={r.contactEmail}
           github={r.github}
           githubLabel={r.contactGithub}
           siteUrl={r.siteUrl}
+          siteLabel={r.siteLinkLabel}
           experienceYears={r.experienceYears}
           experienceLabel={r.contactExperience}
           location={r.location}
@@ -66,6 +76,8 @@ export function Resume() {
             heading={r.sectionProjects}
             coreContributionsLabel={r.coreContributions}
             liveDemoLabel={r.liveDemo}
+            detailsLabel={r.projectDetails}
+            collapseLabel={r.projectCollapse}
             items={r.projects}
           />
           <ResumeStack
@@ -74,11 +86,20 @@ export function Resume() {
           />
           <ResumeBreakthroughs
             heading={r.sectionBreakthroughs}
+            challengeLabel={r.breakthroughChallenge}
+            solutionLabel={r.breakthroughSolution}
             items={r.breakthroughs}
           />
         </div>
 
-        <ResumeFooter role={r.role} location={r.location} siteUrl={r.siteUrl} email={r.email} github={r.github} />
+        <ResumeFooter
+          contactLabel={r.footerContact}
+          role={r.role}
+          location={r.location}
+          siteUrl={r.siteUrl}
+          email={r.email}
+          github={r.github}
+        />
       </div>
     </main>
   );
@@ -136,10 +157,20 @@ function ResumeHero({
   name,
   role,
   kicker,
+  heroLabel,
+  statYears,
+  statProjects,
+  statEmployers,
+  hintSince,
 }: {
   name: string;
   role: string;
   kicker: string;
+  heroLabel: string;
+  statYears: string;
+  statProjects: string;
+  statEmployers: string;
+  hintSince: string;
 }) {
   return (
     <header className="grid grid-cols-1 gap-x-12 gap-y-10 border-b border-white/10 pb-12 lg:grid-cols-12 lg:pb-16">
@@ -174,13 +205,13 @@ function ResumeHero({
           className="catalog-num mb-3 text-[10px] text-[var(--mute-on-night)]"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          AT A GLANCE
+          {heroLabel}
         </p>
         {/* Desktop grid: 1-row horizontal; mobile: stacked. */}
         <div className="grid grid-cols-3 gap-4 sm:grid-cols-3">
-          <HeroStat value="08+" label="YEARS / 年" hint="Since 2018" />
-          <HeroStat value="07" label="PROJECTS / 项" />
-          <HeroStat value="01" label="EMPLOYER / 公司" hint="2018 → 2026" />
+          <HeroStat value="08+" label={statYears} hint={hintSince} />
+          <HeroStat value="07" label={statProjects} />
+          <HeroStat value="01" label={statEmployers} hint="2018 → 2026" />
         </div>
       </aside>
     </header>
@@ -193,6 +224,7 @@ function ResumeContactStrip({
   github,
   githubLabel,
   siteUrl,
+  siteLabel,
   experienceYears,
   experienceLabel,
   location,
@@ -205,6 +237,7 @@ function ResumeContactStrip({
   github: string;
   githubLabel: string;
   siteUrl: string;
+  siteLabel: string;
   experienceYears: string;
   experienceLabel: string;
   location: string;
@@ -259,7 +292,7 @@ function ResumeContactStrip({
         })}
       </div>
       <p className="mt-4 hidden text-[10px] text-[var(--mute-on-night)] sm:block">
-        Site: <a href={siteUrl} target="_blank" rel="noreferrer" className="focus-ring text-[var(--paper-on-night)]/70 no-underline transition-colors duration-150 hover:text-[var(--ember)]">{siteUrl.replace(/^https?:\/\//, "")}</a>
+        {siteLabel} <a href={siteUrl} target="_blank" rel="noreferrer" className="focus-ring text-[var(--paper-on-night)]/70 no-underline transition-colors duration-150 hover:text-[var(--ember)]">{siteUrl.replace(/^https?:\/\//, "")}</a>
       </p>
     </div>
   );
@@ -433,11 +466,15 @@ function ProjectCard({
   index,
   liveDemoLabel,
   coreContributionsLabel,
+  detailsLabel,
+  collapseLabel,
 }: {
   project: ProjectItem;
   index: number;
   liveDemoLabel: string;
   coreContributionsLabel: string;
+  detailsLabel: string;
+  collapseLabel: string;
 }) {
   const [open, setOpen] = useState(false);
   const detailsRef = useRef<HTMLDivElement>(null);
@@ -484,7 +521,7 @@ function ProjectCard({
           className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] text-[var(--paper-on-night)]/85 transition-colors duration-150 hover:border-[var(--ember)]/45 hover:text-[var(--ember)]"
         >
           <span className="catalog-num" style={{ fontFamily: "var(--font-mono)" }}>
-            {open ? "COLLAPSE" : "DETAILS"}
+            {open ? collapseLabel : detailsLabel}
           </span>
           <span
             aria-hidden
@@ -549,11 +586,15 @@ function ResumeProjects({
   heading,
   coreContributionsLabel,
   liveDemoLabel,
+  detailsLabel,
+  collapseLabel,
   items,
 }: {
   heading: string;
   coreContributionsLabel: string;
   liveDemoLabel: string;
+  detailsLabel: string;
+  collapseLabel: string;
   items: readonly ProjectItem[];
 }) {
   return (
@@ -567,6 +608,8 @@ function ResumeProjects({
             index={i}
             liveDemoLabel={liveDemoLabel}
             coreContributionsLabel={coreContributionsLabel}
+            detailsLabel={detailsLabel}
+            collapseLabel={collapseLabel}
           />
         ))}
       </div>
@@ -630,9 +673,13 @@ type Breakthrough = { challenge: string; solution: string };
 
 function ResumeBreakthroughs({
   heading,
+  challengeLabel,
+  solutionLabel,
   items,
 }: {
   heading: string;
+  challengeLabel: string;
+  solutionLabel: string;
   items: readonly Breakthrough[];
 }) {
   return (
@@ -655,7 +702,7 @@ function ResumeBreakthroughs({
                 className="catalog-num mb-1 text-[10px] text-[var(--ember)] sm:hidden"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
-                CHALLENGE
+                {challengeLabel}
               </p>
               <p
                 className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--paper-on-night)]"
@@ -669,7 +716,7 @@ function ResumeBreakthroughs({
                 className="catalog-num mb-1 text-[10px] text-[var(--mute-on-night)] sm:hidden"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
-                SOLUTION
+                {solutionLabel}
               </p>
               <p className="text-[14px] leading-[1.7] text-[var(--paper-on-night)]/85">
                 {row.solution}
@@ -687,12 +734,14 @@ function ResumeBreakthroughs({
 /* -------------------------------------------------------------------- */
 
 function ResumeFooter({
+  contactLabel,
   role,
   location,
   siteUrl,
   email,
   github,
 }: {
+  contactLabel: string;
   role: string;
   location: string;
   siteUrl: string;
@@ -707,7 +756,7 @@ function ResumeFooter({
             className="catalog-num mb-2 text-[10px] text-[var(--mute-on-night)]"
             style={{ fontFamily: "var(--font-mono)" }}
           >
-            CONTACT
+            {contactLabel}
           </p>
           <p className="text-[14px] leading-relaxed text-[var(--paper-on-night)]/90">
             <a href={`mailto:${email}`} className="focus-ring no-underline transition-colors duration-150 hover:text-[var(--ember)]">
